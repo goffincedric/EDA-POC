@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.axonframework:axon-spring:4.0.3">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.axonframework/axon-spring/4.0.3/4b36aa90908597c05e23b1a45c2e219fc007e7ef/axon-spring-4.0.3.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.axonframework/axon-spring/4.0.3/eec69fe29c893e7b7c76482fa604a695c99d7b4a/axon-spring-4.0.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

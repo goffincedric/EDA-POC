@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.axonframework:axon-eventsourcing:4.0.3">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.axonframework/axon-eventsourcing/4.0.3/25ba936ba6f0900fda36ca4b46daff207d54b9d8/axon-eventsourcing-4.0.3.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.axonframework/axon-eventsourcing/4.0.3/be6d50f449763d6ed61b37841d317589cddddbb3/axon-eventsourcing-4.0.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
