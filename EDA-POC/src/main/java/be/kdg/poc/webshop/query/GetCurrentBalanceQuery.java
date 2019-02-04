@@ -7,13 +7,12 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 /**
  * @author Cédric Goffin
- * 02/02/2019 14:04
+ * 02/02/2019 14:06
  */
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor
-public class GetCurrentStockAmountCommand {
+public class GetCurrentBalanceQuery {
     @TargetAggregateIdentifier
     private final String shopId;
-    private final String productId;
 }

@@ -17,7 +17,7 @@ public class ProductDTO {
     private String name;
 
     // Retail price
-    private double sellPrice;
+    private double retailPrice;
 
     // Price of product at wholesale
     private double buyPrice;

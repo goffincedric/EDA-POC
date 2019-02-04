@@ -2,18 +2,19 @@ package be.kdg.poc.commandmodel;
 
 import be.kdg.poc.product.dom.Product;
 import be.kdg.poc.webshop.command.*;
+import be.kdg.poc.webshop.dom.Webshop;
 import be.kdg.poc.webshop.event.*;
-import be.kdg.poc.webshop.exception.InsufficientStockException;
 import lombok.NoArgsConstructor;
 import org.axonframework.commandhandling.CommandHandler;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Logger;
 
 /**
  * @author Cédric Goffin
@@ -21,6 +22,7 @@ import java.util.Map;
  */
 
 @Aggregate
+@Service
 @NoArgsConstructor // Required for Axon test fixture
 public class WebshopAggregate {
     // TODO: Initialize value from properties?
@@ -28,13 +30,8 @@ public class WebshopAggregate {
 
     @AggregateIdentifier
     private String id;
-    private String name;
+    private Webshop webshop;
 
-    private Map<Product, Integer> inventory;
-
-    private double balance;
-
-    // Constructor/handler for CreateShopCommand
     @CommandHandler
     public WebshopAggregate(CreateShopCommand createShopCommand) {
         System.out.println("Create shop");
@@ -47,22 +44,66 @@ public class WebshopAggregate {
         AggregateLifecycle.apply(new ShopCreatedEvent(createShopCommand.getId(), createShopCommand.getName(), defaultBalance));
     }
 
-    // Eventhandler for shopCreatedEvent
-    @EventSourcingHandler
-    protected void on(ShopCreatedEvent shopCreatedEvent) {
-        System.out.println("Shop created");
-        this.id = shopCreatedEvent.getId();
-        this.name = shopCreatedEvent.getName();
-
-        this.inventory = new HashMap<>();
-
-        this.balance = shopCreatedEvent.getBalance();
-    }
-
     @CommandHandler
     protected void handle(DeleteShopCommand deleteShopCommand) {
         System.out.println("Delete shop");
         AggregateLifecycle.apply(new ShopDeletedEvent(deleteShopCommand.getShopId()));
+    }
+
+    @CommandHandler
+    protected String handle(AddProductCommand addProductCommand) {
+        System.out.println("Add product");
+        Assert.isTrue(
+                !this.webshop.productExists(addProductCommand.getProduct().getId()),
+                "Product already in shop"
+        );
+        AggregateLifecycle.apply(new ProductAddedEvent(addProductCommand.getShopId(), addProductCommand.getProduct()));
+        return addProductCommand.getProduct().getId();
+    }
+
+    @CommandHandler
+    protected void handle(RemoveProductCommand removeProductCommand) {
+        Assert.isTrue(
+                this.webshop.productExists(removeProductCommand.getProductId()),
+                "Product not found"
+        );
+        AggregateLifecycle.apply(new ProductRemovedEvent(removeProductCommand.getShopId(), removeProductCommand.getProductId()));
+    }
+
+    @CommandHandler
+    protected String handle(BuyProductCommand buyProductCommand) {
+        System.out.println("Buy product");
+        Assert.isTrue(
+                this.webshop.productExists(buyProductCommand.getProductId()),
+                "Product not found"
+        );
+        Assert.isTrue(
+                this.webshop.getInventoryAmount(buyProductCommand.getProductId()).get() - 1 >= 0,
+                "Insufficient amount of product in inventory"
+        );
+
+        // Buy product event
+        AggregateLifecycle.apply(new ProductBoughtEvent(buyProductCommand.getShopId(), buyProductCommand.getProductId()));
+
+        // Check for low stock
+        Optional<Integer> optionalAmount = webshop.getInventoryAmount(buyProductCommand.getProductId());
+        if (optionalAmount.isPresent() && optionalAmount.get() - 1 < LOW_STOCK_TRIGGER) {
+            // Restock product
+            AggregateLifecycle.apply(new LowStockEvent(this.id, buyProductCommand.getProductId()));
+        }
+        return buyProductCommand.getProductId();
+    }
+
+    @EventSourcingHandler
+    protected void on(ShopCreatedEvent shopCreatedEvent) {
+        System.out.println("Shop created");
+        Logger.getLogger(this.getClass().getName()).info("Shop created");
+        this.id = shopCreatedEvent.getId();
+        this.webshop = new Webshop(
+                shopCreatedEvent.getId(),
+                shopCreatedEvent.getName(),
+                shopCreatedEvent.getBalance()
+        );
     }
 
     @EventSourcingHandler
@@ -71,64 +112,29 @@ public class WebshopAggregate {
         AggregateLifecycle.markDeleted();
     }
 
-    @CommandHandler
-    protected void handle(AddProductCommand addProductCommand) {
-        Assert.isTrue(
-                inventory.keySet().stream().noneMatch(product -> product.getId().equals(addProductCommand.getProduct().getId())),
-                "Product already in shop"
-        );
-        AggregateLifecycle.apply(new ProductAddedEvent(addProductCommand.getShopId(), addProductCommand.getProduct()));
-    }
-
     @EventSourcingHandler
     protected void on(ProductAddedEvent productAddedEvent) {
-        inventory.put(productAddedEvent.getProduct(), 0);
-    }
-
-    @CommandHandler
-    protected void handle(RemoveProductCommand removeProductCommand) {
-        Assert.isTrue(
-                inventory.keySet().stream().anyMatch(product -> product.getId().equals(removeProductCommand.getProductId())),
-                "Product not found"
-        );
-        AggregateLifecycle.apply(new ProductRemovedEvent(removeProductCommand.getShopId(), removeProductCommand.getProductId()));
+        System.out.println("Product added");
+        Logger.getLogger(this.getClass().getName()).info("Product added");
+        this.webshop.getInventory().put(productAddedEvent.getProduct(), 0);
     }
 
     @EventSourcingHandler
     protected void on(ProductRemovedEvent productRemovedEvent) {
-        Product product = inventory.keySet().stream().filter(p -> p.getId().equals(productRemovedEvent.getProductId())).findFirst().get();
-        inventory.remove(product);
-    }
-
-    @CommandHandler
-    protected void handle(BuyProductCommand buyProductCommand) {
-        Assert.isTrue(
-                inventory.keySet().stream().anyMatch(p -> p.getId().equals(buyProductCommand.getProductId())),
-                "Product not found"
-        );
-        AggregateLifecycle.apply(new ProductBoughtEvent(buyProductCommand.getShopId(), buyProductCommand.getProductId()));
+        System.out.println("Product Removed");
+        Product product = this.webshop.getProduct(productRemovedEvent.getProductId()).get();
+        this.webshop.getInventory().remove(product);
     }
 
     @EventSourcingHandler
-    protected void on(ProductBoughtEvent productBoughtEvent) throws InsufficientStockException {
+    protected void on(ProductBoughtEvent productBoughtEvent) {
+        System.out.println("Product bought");
         // Get product and stock from inventory
-        Product product = inventory.keySet().stream().filter(p -> p.getId().equals(productBoughtEvent.getProductId())).findFirst().get();
-        int newStock = inventory.get(product) - 1;
-
-        // Check stock requirements
-        if (newStock > 0) {
-            // Lower stock by one
-            inventory.put(product, --newStock);
-            // Add retailprice to current balance
-            balance += product.getRetailPrice();
-
-            // Check for low stock
-            if (newStock > LOW_STOCK_TRIGGER)
-                AggregateLifecycle.apply(new LowStockEvent(this.id, productBoughtEvent.getProductId()));
-        } else {
-            // If no products left to buy
-            throw new InsufficientStockException();
-        }
+        Product product = this.webshop.getProduct(productBoughtEvent.getProductId()).get();
+        // Lower stock by one
+        this.webshop.getInventory().put(product, this.webshop.getInventory().get(product) - 1);
+        // Add retailprice to current balance
+        this.webshop.setBalance(this.webshop.getBalance() + product.getRetailPrice());
     }
 
     @EventSourcingHandler
@@ -138,6 +144,6 @@ public class WebshopAggregate {
 
     @Override
     public String toString() {
-        return "Webshop '" + name + "' (id: '" + id + "') has balance of €" + String.format("%.2f", balance);
+        return "Webshop '" + this.webshop.getName() + "' (id: '" + id + "') has balance of €" + String.format("%.2f", this.webshop.getBalance());
     }
 }

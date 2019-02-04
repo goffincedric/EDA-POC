@@ -3,17 +3,21 @@ package be.kdg.poc.webshop.controllers.rest;
 import be.kdg.poc.product.dom.Product;
 import be.kdg.poc.product.dto.ProductDTO;
 import be.kdg.poc.webshop.command.*;
-import be.kdg.poc.webshop.query.GetCurrentBalanceCommand;
-import be.kdg.poc.webshop.query.GetCurrentStockAmountCommand;
+import be.kdg.poc.webshop.query.GetCurrentBalanceQuery;
+import be.kdg.poc.webshop.query.GetCurrentStockAmountQuery;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.modelling.command.AggregateNotFoundException;
+import org.axonframework.queryhandling.QueryGateway;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Cédric Goffin
@@ -25,23 +29,31 @@ import java.util.concurrent.CompletableFuture;
 public class ShopRestController {
     private final ModelMapper modelMapper;
     private final CommandGateway commandGateway;
+    private final QueryGateway queryGateway;
 
     @Autowired
-    public ShopRestController(ModelMapper modelMapper, CommandGateway commandGateway) {
+    public ShopRestController(ModelMapper modelMapper, CommandGateway commandGateway, QueryGateway queryGateway) {
         this.modelMapper = modelMapper;
         this.commandGateway = commandGateway;
+        this.queryGateway = queryGateway;
     }
 
-    @GetMapping("currentBalance/{shopId}")
-    public CompletableFuture<Object> getCurrentStockAmount(@PathVariable String shopId) {
-        CompletableFuture<Object> future = commandGateway.send(new GetCurrentBalanceCommand(shopId));
-        return future;
+    @GetMapping("/currentBalance")
+    public ResponseEntity<Double> getCurrentBalance(@RequestParam(value = "shopId") String shopId) throws ExecutionException, InterruptedException {
+        Optional<Double> optionalBalance = (Optional<Double>) queryGateway.query(new GetCurrentBalanceQuery(shopId), Optional.class).get();
+        return optionalBalance.map(balance -> new ResponseEntity<>(
+                balance,
+                HttpStatus.OK
+        )).orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
 
     @GetMapping("/stockAmount")
-    public CompletableFuture<Object> getCurrentBalance(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) {
-        CompletableFuture<Object> future = commandGateway.send(new GetCurrentStockAmountCommand(shopId, productId));
-        return future;
+    public ResponseEntity<Integer> getCurrentStockAmount(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) throws ExecutionException, InterruptedException {
+        Optional<Integer> optionalAmount = (Optional<Integer>) queryGateway.query(new GetCurrentStockAmountQuery(shopId, productId), Optional.class).get();
+        return optionalAmount.map(amount -> new ResponseEntity<>(
+                amount,
+                HttpStatus.OK
+        )).orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
 
     // Returns id of created shop
@@ -53,29 +65,29 @@ public class ShopRestController {
         return future;
     }
 
-    @DeleteMapping("delete/{id}")
-    public CompletableFuture<Object> deleteShop(@PathVariable String id) {
-        CompletableFuture<Object> future = commandGateway.send(new DeleteShopCommand(id));
+    @DeleteMapping("/delete")
+    public CompletableFuture<Object> deleteShop(@RequestParam(value = "shopId") String shopId) {
+        CompletableFuture<Object> future = commandGateway.send(new DeleteShopCommand(shopId));
         return future;
     }
 
-    @PutMapping("buy/{shopId}/{productId}")
-    public CompletableFuture<Object> buyProduct(@PathVariable String shopId, @PathVariable String productId) {
-        CompletableFuture<Object> future = commandGateway.send(new BuyProductCommand(shopId, productId));
-        return future;
-    }
-
-    @PutMapping("add/{shopId}/{productId}")
-    public CompletableFuture<Object> addProduct(@PathVariable String shopId, @RequestBody ProductDTO productDTO) {
+    @PutMapping("/addProduct")
+    public CompletableFuture<Object> addProduct(@RequestParam(value = "shopId") String shopId, @RequestBody ProductDTO productDTO) {
         Product product = modelMapper.map(productDTO, Product.class);
 
-        CompletableFuture<Object> future = commandGateway.send(new AddProductCommand(shopId,  product));
+        CompletableFuture<Object> future = commandGateway.send(new AddProductCommand(shopId, product));
         return future;
     }
 
-    @PutMapping("remove/{shopId}/{productId}")
-    public CompletableFuture<Object> removeProduct(@PathVariable String shopId, @PathVariable String productId) {
+    @PutMapping("/removeProduct")
+    public CompletableFuture<Object> removeProduct(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) {
         CompletableFuture<Object> future = commandGateway.send(new RemoveProductCommand(shopId, productId));
+        return future;
+    }
+
+    @PutMapping("/buy")
+    public CompletableFuture<Object> buyProduct(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) {
+        CompletableFuture<Object> future = commandGateway.send(new BuyProductCommand(shopId, productId));
         return future;
     }
 

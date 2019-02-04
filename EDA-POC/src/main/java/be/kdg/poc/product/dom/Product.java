@@ -16,6 +16,7 @@ import java.util.UUID;
  */
 
 @Data
+@NoArgsConstructor
 public class Product {
     private String id;
 
