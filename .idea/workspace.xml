@@ -2,23 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="10eb4e2f-3ab3-4e38-bfba-192b96196791" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_sun_istack_istack_commons_runtime_3_0_8.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__com_sun_xml_fastinfoset_FastInfoset_1_2_16.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__jakarta_activation_jakarta_activation_api_1_2_1.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__jakarta_xml_bind_jakarta_xml_bind_api_2_3_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__javax_json_javax_json_api_1_0_b01.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_glassfish_jaxb_jaxb_runtime_2_3_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_glassfish_jaxb_txw2_2_3_2.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/libraries/Gradle__org_jvnet_staxex_stax_ex_1_8_1.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/EDA-POC/.gitlab-ci.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/EDA-POC/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Gradle__javax_json_javax_json_api_1_1_2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/be.kdg.EDA-POC.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/be.kdg.EDA-POC.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EDA-POC/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/EDA-POC/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EDA-WEB/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/EDA-WEB/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/EDA-WEB/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/EDA-WEB/package.json" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/EDA-POC/.gradle/" />
     <ignored path="$PROJECT_DIR$/EDA-POC/build/" />
@@ -99,13 +83,15 @@
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="gradle" value="9" />
-          <entry key="yml" value="8" />
+          <entry key="txt" value="27" />
+          <entry key="yml" value="19" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="Groovy" value="9" />
-          <entry key="YAML" value="8" />
+          <entry key="PLAIN_TEXT" value="27" />
+          <entry key="YAML" value="19" />
         </counts>
       </usages-collector>
     </session>
@@ -127,8 +113,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/EDA-POC/.gitlab-ci.yml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="350">
-              <caret line="29" column="42" selection-start-line="29" selection-start-column="28" selection-end-line="29" selection-end-column="42" />
+            <state relative-caret-position="452">
+              <caret line="35" lean-forward="true" selection-start-line="35" selection-end-line="35" />
             </state>
           </provider>
         </entry>
@@ -141,8 +127,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/EDA-POC/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="483">
-              <caret line="35" column="21" selection-start-line="35" selection-start-column="21" selection-end-line="35" selection-end-column="21" />
+            <state relative-caret-position="418">
+              <caret line="36" column="19" selection-start-line="36" selection-start-column="19" selection-end-line="36" selection-end-column="19" />
             </state>
           </provider>
         </entry>
@@ -663,7 +649,7 @@
     <property name="RequestMappingsPanelWidth1" value="75" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1549389445261" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1549389995778" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/EDA-WEB/EDA-WEB.iml" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.path.for.package.tslint" value="project" />
@@ -757,12 +743,20 @@
       <workItem from="1548759835022" duration="542000" />
       <workItem from="1549386400802" duration="1361000" />
       <workItem from="1549387915306" duration="70000" />
-      <workItem from="1549388013142" duration="1316000" />
+      <workItem from="1549388013142" duration="1849000" />
     </task>
+    <task id="LOCAL-00001" summary="CI setup &amp; build.gradle fix">
+      <created>1549389508158</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1549389508158</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="3289000" />
+    <option name="totallyTimeSpent" value="3822000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -825,17 +819,12 @@
       <path value="$PROJECT_DIR$/EDA-POC" />
       <path value="$PROJECT_DIR$/EDA-WEB" />
     </ignored-roots>
+    <MESSAGE value="CI setup &amp; build.gradle fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="CI setup &amp; build.gradle fix" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/EDA-POC/gradlew">
       <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/EDA-POC/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="483">
-          <caret line="35" column="21" selection-start-line="35" selection-start-column="21" selection-end-line="35" selection-end-column="21" />
-        </state>
-      </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/EDA-POC/src/main/java/be/kdg/poc/EDAApplication.java">
       <provider selected="true" editor-type-id="text-editor">
@@ -847,10 +836,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/EDA-POC/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="418">
+          <caret line="36" column="19" selection-start-line="36" selection-start-column="19" selection-end-line="36" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/EDA-POC/.gitlab-ci.yml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="350">
-          <caret line="29" column="42" selection-start-line="29" selection-start-column="28" selection-end-line="29" selection-end-column="42" />
+        <state relative-caret-position="452">
+          <caret line="35" lean-forward="true" selection-start-line="35" selection-end-line="35" />
         </state>
       </provider>
     </entry>
