@@ -29,6 +29,10 @@ dependencies {
 
     compileOnly group: 'org.projectlombok', name: 'lombok' // https://mvnrepository.com/artifact/org.projectlombok/lombok
     compile group: 'javax.json', name: 'javax.json-api' // https://mvnrepository.com/artifact/javax.json/javax.json-api
-    compile group: 'org.glassfish', name: 'javax.json' // https://mvnrepository.com/artifact/org.glassfish/javax.json
-    compile group: 'org.glassfish.jaxb', name: 'jaxb-runtime' // https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime
+
+    compile group: 'javax.json', name: 'javax.json-api', version: '1.0-b01'
+    compile group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.3.2'
+
+    //compile group: 'org.glassfish', name: 'javax.json' // https://mvnrepository.com/artifact/org.glassfish/javax.json
+    //compile group: 'org.glassfish.jaxb', name: 'jaxb-runtime' // https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime
 }
