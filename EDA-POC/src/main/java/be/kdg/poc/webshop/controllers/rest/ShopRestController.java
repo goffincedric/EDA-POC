@@ -9,14 +9,12 @@ import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.axonframework.queryhandling.QueryGateway;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -57,17 +55,21 @@ public class ShopRestController {
 
     // Returns id of created shop
     @PostMapping("/create")
-    public CompletableFuture<String> createShop(@RequestParam(value = "name") String name) {
+    public ResponseEntity<String> createShop(@RequestParam(value = "name") String name) throws ExecutionException, InterruptedException {
         String id = UUID.randomUUID().toString();
 
-        CompletableFuture<String> future = commandGateway.send(new CreateShopCommand(id, name));
-        return future;
+        // Blocks on get
+        String result = (String) commandGateway.send(new CreateShopCommand(id, name)).get();
+        return new ResponseEntity<>(
+                result,
+                HttpStatus.OK
+        );
     }
 
     @DeleteMapping("/delete")
-    public CompletableFuture<Object> deleteShop(@RequestParam(value = "shopId") String shopId) {
-        CompletableFuture<Object> future = commandGateway.send(new DeleteShopCommand(shopId));
-        return future;
+    public ResponseEntity deleteShop(@RequestParam(value = "shopId") String shopId) throws ExecutionException, InterruptedException {
+        commandGateway.send(new DeleteShopCommand(shopId)).get();
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @PutMapping("/addProduct")
@@ -77,23 +79,25 @@ public class ShopRestController {
         product.setId(productId);
 
         // Blocks on get
-        commandGateway.send(new AddProductCommand(shopId, product)).get();
+        String result = (String) commandGateway.send(new AddProductCommand(shopId, product)).get();
         return new ResponseEntity<>(
-                productId,
+                result,
                 HttpStatus.OK
         );
     }
 
     @PutMapping("/removeProduct")
-    public CompletableFuture<Object> removeProduct(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) {
-        CompletableFuture<Object> future = commandGateway.send(new RemoveProductCommand(shopId, productId));
-        return future;
+    public ResponseEntity removeProduct(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) throws ExecutionException, InterruptedException {
+        commandGateway.send(new RemoveProductCommand(shopId, productId)).get();
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @PutMapping("/buy")
-    public CompletableFuture<Object> buyProduct(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) {
-        CompletableFuture<Object> future = commandGateway.send(new BuyProductCommand(shopId, productId));
-        return future;
+    public ResponseEntity<String> buyProduct(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) throws ExecutionException, InterruptedException {
+        String result = (String) commandGateway.send(new BuyProductCommand(shopId, productId)).get();
+        return new ResponseEntity<>(
+                HttpStatus.OK
+        );
     }
 
 

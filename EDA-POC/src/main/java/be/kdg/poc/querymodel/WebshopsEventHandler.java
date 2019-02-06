@@ -7,11 +7,8 @@ import be.kdg.poc.webshop.query.GetCurrentBalanceQuery;
 import be.kdg.poc.webshop.query.GetCurrentStockAmountQuery;
 import lombok.NoArgsConstructor;
 import org.axonframework.eventhandling.AllowReplay;
-import org.axonframework.eventhandling.EventHandler;
-import org.axonframework.eventhandling.TrackingEventProcessor;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.queryhandling.QueryHandler;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;

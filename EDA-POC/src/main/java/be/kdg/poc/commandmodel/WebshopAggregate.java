@@ -13,6 +13,7 @@ import org.axonframework.spring.stereotype.Aggregate;
 import org.springframework.util.Assert;
 
 import java.util.Optional;
+import java.util.logging.Logger;
 
 /**
  * @author Cédric Goffin
@@ -22,6 +23,8 @@ import java.util.Optional;
 @Aggregate
 @NoArgsConstructor // Required for Axon test fixture
 public class WebshopAggregate {
+    private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
+
     // TODO: Initialize value from properties?
     private static final int LOW_STOCK_TRIGGER = 5;
 
@@ -31,7 +34,6 @@ public class WebshopAggregate {
 
     @CommandHandler
     public WebshopAggregate(CreateShopCommand createShopCommand) {
-        System.out.println("Create shop");
         Assert.hasLength(createShopCommand.getId(), "Missing id");
         Assert.hasLength(createShopCommand.getName(), "Missing shop name");
 
@@ -43,17 +45,16 @@ public class WebshopAggregate {
 
     @CommandHandler
     protected void handle(DeleteShopCommand deleteShopCommand) {
-        System.out.println("Delete shop");
         AggregateLifecycle.apply(new ShopDeletedEvent(deleteShopCommand.getShopId()));
     }
 
     @CommandHandler
     protected String handle(AddProductCommand addProductCommand) {
-        System.out.println("Add product");
         Assert.isTrue(
                 !this.webshop.productExists(addProductCommand.getProduct().getId()),
                 "Product already in shop"
         );
+
         AggregateLifecycle.apply(new ProductAddedEvent(addProductCommand.getShopId(), addProductCommand.getProduct()));
         return addProductCommand.getProduct().getId();
     }
@@ -64,12 +65,12 @@ public class WebshopAggregate {
                 this.webshop.productExists(removeProductCommand.getProductId()),
                 "Product not found"
         );
+
         AggregateLifecycle.apply(new ProductRemovedEvent(removeProductCommand.getShopId(), removeProductCommand.getProductId()));
     }
 
     @CommandHandler
     protected String handle(BuyProductCommand buyProductCommand) {
-        System.out.println("Buy product");
         Assert.isTrue(
                 this.webshop.productExists(buyProductCommand.getProductId()),
                 "Product not found"
@@ -93,43 +94,48 @@ public class WebshopAggregate {
 
     @EventSourcingHandler
     protected void on(ShopCreatedEvent shopCreatedEvent) {
-        System.out.println("Shop created");
         this.id = shopCreatedEvent.getId();
         this.webshop = new Webshop(
                 shopCreatedEvent.getId(),
                 shopCreatedEvent.getName(),
                 shopCreatedEvent.getBalance()
         );
+
+        LOGGER.info("Shop created: " + webshop);
     }
 
     @EventSourcingHandler
     protected void on(ShopDeletedEvent shopDeletedEvent) {
-        System.out.println("Shop deleted");
         AggregateLifecycle.markDeleted();
+
+        LOGGER.info("Shop deleted: " + webshop);
     }
 
     @EventSourcingHandler
     protected void on(ProductAddedEvent productAddedEvent) {
-        System.out.println("Product added");
         this.webshop.getInventory().put(productAddedEvent.getProduct(), 0);
+
+        LOGGER.info("Product added to shop with id '" + id + "': " + productAddedEvent.getProduct());
     }
 
     @EventSourcingHandler
     protected void on(ProductRemovedEvent productRemovedEvent) {
-        System.out.println("Product Removed");
         Product product = this.webshop.getProduct(productRemovedEvent.getProductId()).get();
         this.webshop.getInventory().remove(product);
+
+        LOGGER.info("Product (" + product + ") added to shop with id '" + id + "'");
     }
 
     @EventSourcingHandler
     protected void on(ProductBoughtEvent productBoughtEvent) {
-        System.out.println("Product bought");
         // Get product and stock from inventory
         Product product = this.webshop.getProduct(productBoughtEvent.getProductId()).get();
         // Lower stock by one
         this.webshop.getInventory().put(product, this.webshop.getInventory().get(product) - 1);
         // Add retailprice to current balance
         this.webshop.setBalance(this.webshop.getBalance() + product.getRetailPrice());
+
+        LOGGER.info("Product (" + product + ") bought from shop with id '" + id + "'");
     }
 
     @EventSourcingHandler

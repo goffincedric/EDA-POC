@@ -41,4 +41,9 @@ public class Webshop {
     public Optional<Integer> getInventoryAmount(String productId) {
         return inventory.entrySet().stream().filter(entry -> entry.getKey().getId().equals(productId)).map(Map.Entry::getValue).findFirst();
     }
+
+    @Override
+    public String toString() {
+        return "Id: '" + id + "', Name: '" + name + "', Balance: " + balance;
+    }
 }

@@ -3,11 +3,7 @@ package be.kdg.poc.product.dom;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.axonframework.modelling.command.AggregateIdentifier;
-import org.axonframework.spring.stereotype.Aggregate;
-import org.springframework.stereotype.Component;
 
-import java.io.Serializable;
 import java.util.UUID;
 
 /**
@@ -17,9 +13,9 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Product {
     private String id;
-
     private String name;
 
     // Retail price
@@ -36,5 +32,14 @@ public class Product {
         this.name = name;
         this.retailPrice = retailPrice;
         this.buyPrice = buyPrice;
+    }
+
+    public double getDiscountedRetailPrice() {
+        return retailPrice * (1 - discountPercentage);
+    }
+
+    @Override
+    public String toString() {
+        return "Id: '" + id + "', Name: '" + name + "', RetailPrice: " + retailPrice + "', BuyPrice: " + buyPrice + "', DiscountPercentage: " + discountPercentage;
     }
 }
