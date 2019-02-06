@@ -63,6 +63,17 @@ public class ShopRestControllerTest {
                 )
         );
 
+//        String shopId = initializeShop();
+//
+//        String productId = UUID.randomUUID().toString();
+//        ProductDTO productDTO = new ProductDTO(productId, "Test_Product_1", 10.0, 5.0);
+//        mockMvc.perform(put("/api/shop/addProduct?shopId=" + shopId + "&productId=" + productId)
+//                .contentType(APPLICATION_JSON_UTF8)
+//                .content(objectMapper.writeValueAsString(productDTO)))
+//                .andDo(print())
+//                .andExpect(MockMvcResultMatchers.status().isOk())
+//                .andExpect(result -> Assert.assertEquals(productId, result.getAsyncResult().toString()));
+
         String url = "/api/shop/stockAmount?shopId=" + shopId + "&productId=" + productId;
         mockMvc.perform(get(url))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -96,7 +107,7 @@ public class ShopRestControllerTest {
         String shopId = initializeShop();
         String productId = UUID.randomUUID().toString();
 
-        ProductDTO productDTO = new ProductDTO(productId, "Test_Product_1", 10.0, 5.0);
+        ProductDTO productDTO = new ProductDTO("Test_Product_1", 10.0, 5.0);
 
         String url = "/api/shop/addProduct?shopId=" + shopId + "&productId=" + productId;
         mockMvc.perform(put(url)
@@ -113,7 +124,7 @@ public class ShopRestControllerTest {
         String shopId = initializeShop();
         String productId = UUID.randomUUID().toString();
 
-        ProductDTO productDTO = new ProductDTO(productId, "Test_Product_1", 10.0, 5.0);
+        ProductDTO productDTO = new ProductDTO("Test_Product_1", 10.0, 5.0);
 
         mockMvc.perform(put("/api/shop/addProduct?shopId=" + shopId)
                 .contentType(APPLICATION_JSON_UTF8)

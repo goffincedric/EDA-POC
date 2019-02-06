@@ -1,6 +1,5 @@
 package be.kdg.poc.webshop.event;
 
-import be.kdg.poc.product.dom.Product;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

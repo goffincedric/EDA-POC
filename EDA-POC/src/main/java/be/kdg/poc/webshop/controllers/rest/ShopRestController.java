@@ -31,7 +31,6 @@ public class ShopRestController {
     private final CommandGateway commandGateway;
     private final QueryGateway queryGateway;
 
-    @Autowired
     public ShopRestController(ModelMapper modelMapper, CommandGateway commandGateway, QueryGateway queryGateway) {
         this.modelMapper = modelMapper;
         this.commandGateway = commandGateway;
@@ -72,11 +71,17 @@ public class ShopRestController {
     }
 
     @PutMapping("/addProduct")
-    public CompletableFuture<Object> addProduct(@RequestParam(value = "shopId") String shopId, @RequestBody ProductDTO productDTO) {
+    public ResponseEntity<String> addProduct(@RequestParam(value = "shopId") String shopId, @RequestBody ProductDTO productDTO) throws ExecutionException, InterruptedException {
         Product product = modelMapper.map(productDTO, Product.class);
+        String productId = UUID.randomUUID().toString();
+        product.setId(productId);
 
-        CompletableFuture<Object> future = commandGateway.send(new AddProductCommand(shopId, product));
-        return future;
+        // Blocks on get
+        commandGateway.send(new AddProductCommand(shopId, product)).get();
+        return new ResponseEntity<>(
+                productId,
+                HttpStatus.OK
+        );
     }
 
     @PutMapping("/removeProduct")

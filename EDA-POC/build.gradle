@@ -27,7 +27,7 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-actuator')
 //    runtime('org.springframework.boot:spring-boot-devtools')
     testCompile('org.springframework.boot:spring-boot-starter-test')
-    compile group: 'org.springframework.boot', name: 'spring-boot-autoconfigure' // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-autoconfigure
+//    compile group: 'org.springframework.boot', name: 'spring-boot-autoconfigure' // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-autoconfigure
 
     // Utilities
     compileOnly group: 'org.projectlombok', name: 'lombok' // https://mvnrepository.com/artifact/org.projectlombok/lombok
@@ -49,7 +49,4 @@ dependencies {
     // Database
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa' // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-jpa
     runtime group: 'com.h2database', name: 'h2', version: '1.4.197' // https://mvnrepository.com/artifact/com.h2database/h2
-
-
-
 }

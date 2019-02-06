@@ -10,11 +10,9 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.Optional;
-import java.util.logging.Logger;
 
 /**
  * @author Cédric Goffin
@@ -22,7 +20,6 @@ import java.util.logging.Logger;
  */
 
 @Aggregate
-@Service
 @NoArgsConstructor // Required for Axon test fixture
 public class WebshopAggregate {
     // TODO: Initialize value from properties?
@@ -97,7 +94,6 @@ public class WebshopAggregate {
     @EventSourcingHandler
     protected void on(ShopCreatedEvent shopCreatedEvent) {
         System.out.println("Shop created");
-        Logger.getLogger(this.getClass().getName()).info("Shop created");
         this.id = shopCreatedEvent.getId();
         this.webshop = new Webshop(
                 shopCreatedEvent.getId(),
@@ -115,7 +111,6 @@ public class WebshopAggregate {
     @EventSourcingHandler
     protected void on(ProductAddedEvent productAddedEvent) {
         System.out.println("Product added");
-        Logger.getLogger(this.getClass().getName()).info("Product added");
         this.webshop.getInventory().put(productAddedEvent.getProduct(), 0);
     }
 
