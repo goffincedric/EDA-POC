@@ -11,10 +11,10 @@ stages:
   - deploy
 
 gradle-build:
-  image: java:8-jdk
+  image: java:11-jdk
   stage: build
   only:
-    - master
+    - ci2
   script: "./gradlew build"
   artifacts:
     paths:
