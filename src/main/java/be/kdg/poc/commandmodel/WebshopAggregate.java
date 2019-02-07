@@ -33,19 +33,19 @@ public class WebshopAggregate {
     private Webshop webshop;
 
     @CommandHandler
-    public WebshopAggregate(CreateShopCommand createShopCommand) {
+    public WebshopAggregate(CreateWebshopCommand createShopCommand) {
         Assert.hasLength(createShopCommand.getId(), "Missing id");
         Assert.hasLength(createShopCommand.getName(), "Missing shop name");
 
         // TODO: Change default balance to e.g. 10000.00?
         // TODO: Move to properties?
         double defaultBalance = 0;
-        AggregateLifecycle.apply(new ShopCreatedEvent(createShopCommand.getId(), createShopCommand.getName(), defaultBalance));
+        AggregateLifecycle.apply(new WebshopCreatedEvent(createShopCommand.getId(), createShopCommand.getName(), defaultBalance));
     }
 
     @CommandHandler
-    protected void handle(DeleteShopCommand deleteShopCommand) {
-        AggregateLifecycle.apply(new ShopDeletedEvent(deleteShopCommand.getShopId()));
+    protected void handle(DeleteWebshopCommand deleteShopCommand) {
+        AggregateLifecycle.apply(new WebshopDeletedEvent(deleteShopCommand.getShopId()));
     }
 
     @CommandHandler
@@ -83,17 +83,21 @@ public class WebshopAggregate {
         // Buy product event
         AggregateLifecycle.apply(new ProductBoughtEvent(buyProductCommand.getShopId(), buyProductCommand.getProductId()));
 
+        // Recalculate price
+        // TODO: Implement RecalculatePriceEvent
+
         // Check for low stock
         Optional<Integer> optionalAmount = webshop.getInventoryAmount(buyProductCommand.getProductId());
         if (optionalAmount.isPresent() && optionalAmount.get() - 1 < LOW_STOCK_TRIGGER) {
             // Restock product
             AggregateLifecycle.apply(new LowStockEvent(this.id, buyProductCommand.getProductId()));
         }
+
         return buyProductCommand.getProductId();
     }
 
     @EventSourcingHandler
-    protected void on(ShopCreatedEvent shopCreatedEvent) {
+    protected void on(WebshopCreatedEvent shopCreatedEvent) {
         this.id = shopCreatedEvent.getId();
         this.webshop = new Webshop(
                 shopCreatedEvent.getId(),
@@ -105,7 +109,7 @@ public class WebshopAggregate {
     }
 
     @EventSourcingHandler
-    protected void on(ShopDeletedEvent shopDeletedEvent) {
+    protected void on(WebshopDeletedEvent shopDeletedEvent) {
         AggregateLifecycle.markDeleted();
 
         LOGGER.info("Shop deleted: " + webshop);

@@ -2,13 +2,13 @@ package be.kdg.poc.commandmodel;
 
 import be.kdg.poc.product.dom.Product;
 import be.kdg.poc.webshop.command.AddProductCommand;
-import be.kdg.poc.webshop.command.CreateShopCommand;
-import be.kdg.poc.webshop.command.DeleteShopCommand;
+import be.kdg.poc.webshop.command.CreateWebshopCommand;
+import be.kdg.poc.webshop.command.DeleteWebshopCommand;
 import be.kdg.poc.webshop.command.RemoveProductCommand;
 import be.kdg.poc.webshop.event.ProductAddedEvent;
 import be.kdg.poc.webshop.event.ProductRemovedEvent;
-import be.kdg.poc.webshop.event.ShopCreatedEvent;
-import be.kdg.poc.webshop.event.ShopDeletedEvent;
+import be.kdg.poc.webshop.event.WebshopCreatedEvent;
+import be.kdg.poc.webshop.event.WebshopDeletedEvent;
 import org.axonframework.test.aggregate.AggregateTestFixture;
 import org.axonframework.test.aggregate.FixtureConfiguration;
 import org.axonframework.test.matchers.Matchers;
@@ -58,17 +58,17 @@ public class WebshopAggregateTest {
     @Test
     public void createShop() {
         fixture.given()
-                .when(new CreateShopCommand(testShopId, testShopName))
+                .when(new CreateWebshopCommand(testShopId, testShopName))
                 .expectResultMessageMatching(Matchers.messageWithPayload(Matchers.equalTo(testShopId)))
-                .expectEvents(new ShopCreatedEvent(testShopId, testShopName, 0));
+                .expectEvents(new WebshopCreatedEvent(testShopId, testShopName, 0));
     }
 
     @Test
     public void deleteShop() {
-        fixture.given(new ShopCreatedEvent(testShopId, testShopName, 0))
-                .when(new DeleteShopCommand(testShopId))
+        fixture.given(new WebshopCreatedEvent(testShopId, testShopName, 0))
+                .when(new DeleteWebshopCommand(testShopId))
                 .expectResultMessageMatching(Matchers.messageWithPayload(Matchers.nothing()))
-                .expectEvents(new ShopDeletedEvent(testShopId));
+                .expectEvents(new WebshopDeletedEvent(testShopId));
     }
 
     @Test
@@ -81,7 +81,7 @@ public class WebshopAggregateTest {
                 5
         );
 
-        fixture.given(new ShopCreatedEvent(testShopId, testShopName, 0))
+        fixture.given(new WebshopCreatedEvent(testShopId, testShopName, 0))
                 .when(new AddProductCommand(testShopId, product))
                 .expectResultMessageMatching(Matchers.messageWithPayload(Matchers.equalTo(testProductId)))
                 .expectEvents(new ProductAddedEvent(testShopId, product));
@@ -90,7 +90,7 @@ public class WebshopAggregateTest {
     @Test
     public void removeProduct() {
         fixture.given(
-                new ShopCreatedEvent(testShopId, testShopName, 0),
+                new WebshopCreatedEvent(testShopId, testShopName, 0),
                 new ProductAddedEvent(testShopId, new Product(
                         testProductId,
                         testProductName,

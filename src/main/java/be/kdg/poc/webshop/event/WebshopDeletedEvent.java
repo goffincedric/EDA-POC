@@ -12,7 +12,7 @@ import lombok.Getter;
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor
-public class ShopDeletedEvent {
+public class WebshopDeletedEvent {
     private final String id;
 
     @Override

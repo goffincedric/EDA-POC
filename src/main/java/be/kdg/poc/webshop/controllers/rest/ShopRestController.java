@@ -3,18 +3,21 @@ package be.kdg.poc.webshop.controllers.rest;
 import be.kdg.poc.product.dom.Product;
 import be.kdg.poc.product.dto.ProductDTO;
 import be.kdg.poc.webshop.command.*;
+import be.kdg.poc.webshop.dom.Webshop;
+import be.kdg.poc.webshop.query.GetAllProductsQuery;
+import be.kdg.poc.webshop.query.GetAllWebshops;
 import be.kdg.poc.webshop.query.GetCurrentBalanceQuery;
 import be.kdg.poc.webshop.query.GetCurrentStockAmountQuery;
 import org.axonframework.commandhandling.gateway.CommandGateway;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.axonframework.queryhandling.QueryGateway;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -33,6 +36,84 @@ public class ShopRestController {
         this.modelMapper = modelMapper;
         this.commandGateway = commandGateway;
         this.queryGateway = queryGateway;
+    }
+
+    // Returns id of created shop
+    @PostMapping("/initializeShop")
+    public ResponseEntity<String> initializeShop(@Value(value = "${webshop.initial.name}") String shopName) throws ExecutionException, InterruptedException {
+        // Check if any webshops are present
+        List<Webshop> webshopList = queryGateway.query(new GetAllWebshops(), List.class).get();
+        if (webshopList.isEmpty()) {
+            // Create new webshop
+            String webshopId = UUID.randomUUID().toString();
+            commandGateway.send(new CreateWebshopCommand(webshopId, shopName));
+
+            // Add products to webshop
+            List<Product> products = Arrays.asList(
+                    new Product(
+                            UUID.randomUUID().toString(),
+                            "Keyboard vaccuum cleaner 3000",
+                            200,
+                            0,
+                            100
+                    ),
+                    new Product(
+                            UUID.randomUUID().toString(),
+                            "Banana slicer",
+                            15,
+                            0,
+                            5
+                    ),
+                    new Product(
+                            UUID.randomUUID().toString(),
+                            "YBox Two",
+                            150,
+                            0,
+                            100
+                    ),
+                    new Product(
+                            UUID.randomUUID().toString(),
+                            "Stijn's broken HDD",
+                            100,
+                            0,
+                            20
+                    )
+            );
+            products.forEach(product ->
+                    commandGateway.send(new AddProductCommand(
+                            webshopId,
+                            product
+                    ))
+            );
+
+            return new ResponseEntity<>(
+                    "Webshop already initialized",
+                    HttpStatus.OK
+            );
+        } else {
+            return new ResponseEntity<>(
+                    "Webshop already initialized",
+                    HttpStatus.OK
+            );
+        }
+    }
+
+    @GetMapping("/getWebshops")
+    public ResponseEntity<List<Webshop>> getWebshops() throws ExecutionException, InterruptedException {
+        List<Webshop> webshops = queryGateway.query(new GetAllWebshops(), List.class).get();
+        return new ResponseEntity<>(
+                webshops,
+                HttpStatus.OK
+        );
+    }
+
+    @GetMapping("/getProducts")
+    public ResponseEntity<List<Product>> getProducts(@RequestParam(value = "shopId") String shopId) throws ExecutionException, InterruptedException {
+        List<Product> products = queryGateway.query(new GetAllProductsQuery(shopId), List.class).get();
+        return new ResponseEntity<>(
+                products,
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/currentBalance")
@@ -59,7 +140,7 @@ public class ShopRestController {
         String id = UUID.randomUUID().toString();
 
         // Blocks on get
-        String result = (String) commandGateway.send(new CreateShopCommand(id, name)).get();
+        String result = (String) commandGateway.send(new CreateWebshopCommand(id, name)).get();
         return new ResponseEntity<>(
                 result,
                 HttpStatus.OK
@@ -68,7 +149,7 @@ public class ShopRestController {
 
     @DeleteMapping("/delete")
     public ResponseEntity deleteShop(@RequestParam(value = "shopId") String shopId) throws ExecutionException, InterruptedException {
-        commandGateway.send(new DeleteShopCommand(shopId)).get();
+        commandGateway.send(new DeleteWebshopCommand(shopId)).get();
         return new ResponseEntity(HttpStatus.OK);
     }
 

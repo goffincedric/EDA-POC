@@ -11,7 +11,7 @@ import lombok.Getter;
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor
-public class ShopCreatedEvent {
+public class WebshopCreatedEvent {
     private final String id;
     private final String name;
     private final double balance;
