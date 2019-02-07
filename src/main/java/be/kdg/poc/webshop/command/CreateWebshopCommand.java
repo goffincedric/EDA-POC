@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor
-public class CreateShopCommand {
+public class CreateWebshopCommand {
     @TargetAggregateIdentifier
     private final String id;
     private final String name;

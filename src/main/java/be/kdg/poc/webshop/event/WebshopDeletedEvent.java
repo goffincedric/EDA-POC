@@ -1,23 +1,22 @@
 package be.kdg.poc.webshop.event;
 
+import be.kdg.poc.product.dom.Product;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 /**
  * @author Cédric Goffin
- * 02/02/2019 14:14
+ * 02/02/2019 14:31
  */
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor
-public class ShopCreatedEvent {
+public class WebshopDeletedEvent {
     private final String id;
-    private final String name;
-    private final double balance;
 
     @Override
     public String toString() {
-        return "Created shop '" + name + "' with id '" + id + "'";
+        return "Deleted shop with id '" + id + "'";
     }
 }

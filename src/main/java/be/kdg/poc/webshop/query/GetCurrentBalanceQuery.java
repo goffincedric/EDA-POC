@@ -13,6 +13,5 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
 @EqualsAndHashCode
 @AllArgsConstructor
 public class GetCurrentBalanceQuery {
-    @TargetAggregateIdentifier
     private final String shopId;
 }

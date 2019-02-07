@@ -3,6 +3,8 @@ package be.kdg.poc.querymodel;
 import be.kdg.poc.product.dom.Product;
 import be.kdg.poc.webshop.dom.Webshop;
 import be.kdg.poc.webshop.event.*;
+import be.kdg.poc.webshop.query.GetAllProductsQuery;
+import be.kdg.poc.webshop.query.GetAllWebshops;
 import be.kdg.poc.webshop.query.GetCurrentBalanceQuery;
 import be.kdg.poc.webshop.query.GetCurrentStockAmountQuery;
 import lombok.NoArgsConstructor;
@@ -11,9 +13,7 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * @author Cédric Goffin
@@ -27,7 +27,7 @@ public class WebshopsEventHandler {
     private final Map<String, Webshop> webshops = new HashMap<>();
 
     @EventSourcingHandler
-    public void on(ShopCreatedEvent shopCreatedEvent) {
+    public void on(WebshopCreatedEvent shopCreatedEvent) {
         this.webshops.put(
                 shopCreatedEvent.getId(),
                 new Webshop(
@@ -39,7 +39,7 @@ public class WebshopsEventHandler {
     }
 
     @EventSourcingHandler
-    public void on(ShopDeletedEvent shopDeletedEvent) {
+    public void on(WebshopDeletedEvent shopDeletedEvent) {
         this.webshops.remove(shopDeletedEvent.getId());
     }
 
@@ -67,6 +67,7 @@ public class WebshopsEventHandler {
 
     @EventSourcingHandler
     public void on(LowStockEvent lowStockEvent) {
+
         // TODO: Implement buying new stock, checking if possible with current balance, if balance lower than set limit declare shop bankrupt and initiate delete shop...
     }
 
@@ -87,6 +88,21 @@ public class WebshopsEventHandler {
             return webshops.get(getCurrentStockAmountQuery.getShopId()).getInventoryAmount(getCurrentStockAmountQuery.getProductId());
         } else {
             return Optional.empty();
+        }
+    }
+
+    @QueryHandler
+    protected List handle(GetAllWebshops getAllWebshops) {
+        return new ArrayList<>(webshops.values());
+    }
+
+    @QueryHandler
+    protected List handle(GetAllProductsQuery getAllProductsQuery) {
+        System.out.println("All products query");
+        if (webshops.containsKey(getAllProductsQuery.getShopId())) {
+            return new ArrayList<>(webshops.get(getAllProductsQuery.getShopId()).getInventory().keySet());
+        } else {
+            return new ArrayList<>();
         }
     }
 }

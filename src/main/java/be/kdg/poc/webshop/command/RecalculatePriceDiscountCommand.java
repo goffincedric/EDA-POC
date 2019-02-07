@@ -7,12 +7,13 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 /**
  * @author Cédric Goffin
- * 02/02/2019 13:24
+ * 02/02/2019 13:53
  */
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor
-public class DeleteShopCommand {
+public class RecalculatePriceDiscountCommand {
     @TargetAggregateIdentifier
     private final String shopId;
+    private final String productId;
 }
