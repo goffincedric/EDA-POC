@@ -84,7 +84,7 @@ public class WebshopAggregate {
         AggregateLifecycle.apply(new ProductBoughtEvent(buyProductCommand.getShopId(), buyProductCommand.getProductId()));
 
         // Recalculate price
-        // TODO: Implement RecalculatePriceEvent
+        // TODO: Implement RecalculatePriceCommand
 
         // Check for low stock
         Optional<Integer> optionalAmount = webshop.getInventoryAmount(buyProductCommand.getProductId());
@@ -94,6 +94,16 @@ public class WebshopAggregate {
         }
 
         return buyProductCommand.getProductId();
+    }
+
+    @CommandHandler
+    protected void handle(RecalculatePriceDiscountCommand recalculatePriceDiscountCommand) {
+        Assert.isTrue(
+                this.webshop.productExists(recalculatePriceDiscountCommand.getProductId()),
+                "Product not found"
+        );
+
+        AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(recalculatePriceDiscountCommand.getShopId(), recalculatePriceDiscountCommand.getProductId()));
     }
 
     @EventSourcingHandler
@@ -145,6 +155,11 @@ public class WebshopAggregate {
     @EventSourcingHandler
     protected void on(LowStockEvent lowStockEvent) {
         // TODO: Implement buying new stock, checking if possible with current balance, if balance lower than set limit declare shop bankrupt and initiate delete shop...
+    }
+
+    @EventSourcingHandler
+    protected void on(RecalculatePriceDiscountCommand recalculatePriceDiscountCommand) {
+        // TODO: Implement product discount price recalculation based on leftover stock
     }
 
     @Override

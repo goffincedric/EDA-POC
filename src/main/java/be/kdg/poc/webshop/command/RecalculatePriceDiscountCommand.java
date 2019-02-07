@@ -1,4 +1,4 @@
-package be.kdg.poc.webshop.query;
+package be.kdg.poc.webshop.command;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -7,12 +7,13 @@ import org.axonframework.modelling.command.TargetAggregateIdentifier;
 
 /**
  * @author Cédric Goffin
- * 02/02/2019 14:04
+ * 02/02/2019 13:53
  */
 @Getter
 @EqualsAndHashCode
 @AllArgsConstructor
-public class GetCurrentStockAmountQuery {
+public class RecalculatePriceDiscountCommand {
+    @TargetAggregateIdentifier
     private final String shopId;
     private final String productId;
 }

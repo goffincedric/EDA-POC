@@ -17,7 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -38,7 +41,7 @@ public class ShopRestController {
         this.queryGateway = queryGateway;
     }
 
-    // Returns id of created shop
+    // Returns id of initialized shop
     @PostMapping("/initializeShop")
     public ResponseEntity<String> initializeShop(@Value(value = "${webshop.initial.name}") String shopName) throws ExecutionException, InterruptedException {
         // Check if any webshops are present
@@ -98,6 +101,11 @@ public class ShopRestController {
         }
     }
 
+    /**
+     * @return Returns a list of all webshops.
+     * @throws ExecutionException   when query failed to process.
+     * @throws InterruptedException when query failed to process.
+     */
     @GetMapping("/getWebshops")
     public ResponseEntity<List<Webshop>> getWebshops() throws ExecutionException, InterruptedException {
         List<Webshop> webshops = queryGateway.query(new GetAllWebshops(), List.class).get();
@@ -107,6 +115,12 @@ public class ShopRestController {
         );
     }
 
+    /**
+     * @param shopId String that contains the id of the webshop.
+     * @return Returns a list of products that are part of the webshop with the given id.
+     * @throws ExecutionException   when query failed to process.
+     * @throws InterruptedException when query failed to process.
+     */
     @GetMapping("/getProducts")
     public ResponseEntity<List<Product>> getProducts(@RequestParam(value = "shopId") String shopId) throws ExecutionException, InterruptedException {
         List<Product> products = queryGateway.query(new GetAllProductsQuery(shopId), List.class).get();
@@ -116,6 +130,14 @@ public class ShopRestController {
         );
     }
 
+    /**
+     * Http code 200 when webshop is found, 400 when no webshop could be found for the supplied id.
+     *
+     * @param shopId String that contains the id of the webshop.
+     * @return Returns a double with the balance of the webshop with the given id.
+     * @throws ExecutionException   when query failed to process.
+     * @throws InterruptedException when query failed to process.
+     */
     @GetMapping("/currentBalance")
     public ResponseEntity<Double> getCurrentBalance(@RequestParam(value = "shopId") String shopId) throws ExecutionException, InterruptedException {
         Optional<Double> optionalBalance = (Optional<Double>) queryGateway.query(new GetCurrentBalanceQuery(shopId), Optional.class).get();
@@ -125,6 +147,15 @@ public class ShopRestController {
         )).orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
 
+    /**
+     * Http code 200 when webshop is found, 400 when no webshop could be found for the supplied id.
+     *
+     * @param shopId    String that contains the id of the webshop.
+     * @param productId String that contains the id of the product.
+     * @return Returns the amount of products the shop has in its inventory.
+     * @throws ExecutionException   when query failed to process.
+     * @throws InterruptedException when query failed to process.
+     */
     @GetMapping("/stockAmount")
     public ResponseEntity<Integer> getCurrentStockAmount(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) throws ExecutionException, InterruptedException {
         Optional<Integer> optionalAmount = (Optional<Integer>) queryGateway.query(new GetCurrentStockAmountQuery(shopId, productId), Optional.class).get();
@@ -134,7 +165,12 @@ public class ShopRestController {
         )).orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
 
-    // Returns id of created shop
+    /**
+     * @param name String containing a name of the new webshop that should be created.
+     * @return Returns the id of the new webshop when created successfully.
+     * @throws ExecutionException   when query failed to process.
+     * @throws InterruptedException when query failed to process.
+     */
     @PostMapping("/create")
     public ResponseEntity<String> createShop(@RequestParam(value = "name") String name) throws ExecutionException, InterruptedException {
         String id = UUID.randomUUID().toString();
@@ -147,12 +183,25 @@ public class ShopRestController {
         );
     }
 
+    /**
+     * @param shopId String that contains the id of the webshop.
+     * @return Returns HTTP code 200 when shop was deleted succesfully.
+     * @throws ExecutionException   when query failed to process.
+     * @throws InterruptedException when query failed to process.
+     */
     @DeleteMapping("/delete")
     public ResponseEntity deleteShop(@RequestParam(value = "shopId") String shopId) throws ExecutionException, InterruptedException {
         commandGateway.send(new DeleteWebshopCommand(shopId)).get();
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    /**
+     * @param shopId     String that contains the id of the webshop.
+     * @param productDTO A DTO object containing the information of the product that needs to be added to the webshop.
+     * @return Returns the id of the new product when created successfully.
+     * @throws ExecutionException   when query failed to process.
+     * @throws InterruptedException when query failed to process.
+     */
     @PutMapping("/addProduct")
     public ResponseEntity<String> addProduct(@RequestParam(value = "shopId") String shopId, @RequestBody ProductDTO productDTO) throws ExecutionException, InterruptedException {
         Product product = modelMapper.map(productDTO, Product.class);
@@ -167,18 +216,30 @@ public class ShopRestController {
         );
     }
 
+    /**
+     * @param shopId    String that contains the id of the webshop.
+     * @param productId String that contains the id of the product.
+     * @return Returns HTTP code 200 when product was removed succesfully.
+     * @throws ExecutionException   when query failed to process.
+     * @throws InterruptedException when query failed to process.
+     */
     @PutMapping("/removeProduct")
     public ResponseEntity removeProduct(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) throws ExecutionException, InterruptedException {
         commandGateway.send(new RemoveProductCommand(shopId, productId)).get();
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    /**
+     * @param shopId    String that contains the id of the webshop.
+     * @param productId String that contains the id of the product.
+     * @return Returns HTTP code 200 when product was bought succesfully.
+     * @throws ExecutionException   when query failed to process.
+     * @throws InterruptedException when query failed to process.
+     */
     @PutMapping("/buy")
     public ResponseEntity<String> buyProduct(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) throws ExecutionException, InterruptedException {
         String result = (String) commandGateway.send(new BuyProductCommand(shopId, productId)).get();
-        return new ResponseEntity<>(
-                HttpStatus.OK
-        );
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 
