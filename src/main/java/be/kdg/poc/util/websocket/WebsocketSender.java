@@ -15,17 +15,12 @@ import java.util.Date;
  */
 @Component
 public class WebsocketSender {
-    private final EventBus eventBus;
-    /*private final EventProcessingConfigurer eventProcessingConfigurer;
-    private final MessageDispatchInterceptor interceptor;*/
-
     private final SimpMessagingTemplate simpleMessagingTemplate;
 
     private final SimpleDateFormat eventMessageDateFormat = new SimpleDateFormat("HH:mm:ss");
 
     @Autowired
     public WebsocketSender(EventBus eventBus, SimpMessagingTemplate simpleMessagingTemplate) {
-        this.eventBus = eventBus;
         this.simpleMessagingTemplate = simpleMessagingTemplate;
 
         // Submit any new events to websocket
