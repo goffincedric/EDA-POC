@@ -2,13 +2,13 @@ package be.kdg.poc.webshop.controllers.rest;
 
 import be.kdg.poc.product.dom.Product;
 import be.kdg.poc.product.dto.ProductDTO;
+import be.kdg.poc.util.websocket.WebsocketSender;
 import be.kdg.poc.webshop.command.*;
 import be.kdg.poc.webshop.dom.Webshop;
-import be.kdg.poc.webshop.query.GetAllProductsQuery;
-import be.kdg.poc.webshop.query.GetAllWebshops;
-import be.kdg.poc.webshop.query.GetCurrentBalanceQuery;
-import be.kdg.poc.webshop.query.GetCurrentStockAmountQuery;
+import be.kdg.poc.webshop.query.*;
 import org.axonframework.commandhandling.gateway.CommandGateway;
+import org.axonframework.eventhandling.DomainEventMessage;
+import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.axonframework.queryhandling.QueryGateway;
 import org.modelmapper.ModelMapper;
@@ -17,11 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /**
  * @author Cédric Goffin
@@ -33,13 +32,19 @@ import java.util.concurrent.ExecutionException;
 @RequestMapping("/api/shop")
 public class ShopRestController {
     private final ModelMapper modelMapper;
+
     private final CommandGateway commandGateway;
     private final QueryGateway queryGateway;
+    private final EventStorageEngine eventStorageEngine;
 
-    public ShopRestController(ModelMapper modelMapper, CommandGateway commandGateway, QueryGateway queryGateway) {
+    private final WebsocketSender websocketSender;
+
+    public ShopRestController(ModelMapper modelMapper, CommandGateway commandGateway, QueryGateway queryGateway, EventStorageEngine eventStorageEngine, WebsocketSender websocketSender) {
         this.modelMapper = modelMapper;
         this.commandGateway = commandGateway;
         this.queryGateway = queryGateway;
+        this.eventStorageEngine = eventStorageEngine;
+        this.websocketSender = websocketSender;
     }
 
     // Returns id of initialized shop
@@ -56,7 +61,7 @@ public class ShopRestController {
             List<Product> products = Arrays.asList(
                     new Product(
                             UUID.randomUUID().toString(),
-                            "Keyboard vaccuum cleaner 3000",
+                            "Keyboard vacuum cleaner 3000",
                             200,
                             0,
                             100
@@ -166,6 +171,34 @@ public class ShopRestController {
         )).orElseGet(() -> new ResponseEntity<>(HttpStatus.BAD_REQUEST));
     }
 
+
+    /**
+     * Http code 200 when webshop is found, 400 when no webshop could be found for the supplied id.
+     *
+     * @param shopId String that contains the id of the webshop.
+     * @return Returns a list with all the events that have occurred for the webshop with the given id.
+     * @throws ExecutionException   when query failed to process.
+     * @throws InterruptedException when query failed to process.
+     */
+    @GetMapping("/getEvents")
+    public ResponseEntity<List<String>> getEvents(@RequestParam(value = "shopId") String shopId) throws ExecutionException, InterruptedException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+        List<String> events = eventStorageEngine
+                .readEvents(shopId)
+                .asStream()
+                .map(message ->
+                        simpleDateFormat.format(Date.from(message.getTimestamp())) +
+                        " - " +
+                        message.getPayload().toString()
+                )
+                .collect(Collectors.toList());
+
+        return new ResponseEntity<>(
+                events,
+                HttpStatus.OK
+        );
+    }
+
     /**
      * @param name String containing a name of the new webshop that should be created.
      * @return Returns the id of the new webshop when created successfully.
@@ -186,7 +219,7 @@ public class ShopRestController {
 
     /**
      * @param shopId String that contains the id of the webshop.
-     * @return Returns HTTP code 200 when shop was deleted succesfully.
+     * @return Returns HTTP code 200 when shop was deleted successfully.
      * @throws ExecutionException   when query failed to process.
      * @throws InterruptedException when query failed to process.
      */
@@ -220,7 +253,7 @@ public class ShopRestController {
     /**
      * @param shopId    String that contains the id of the webshop.
      * @param productId String that contains the id of the product.
-     * @return Returns HTTP code 200 when product was removed succesfully.
+     * @return Returns HTTP code 200 when product was removed successfully.
      * @throws ExecutionException   when query failed to process.
      * @throws InterruptedException when query failed to process.
      */
@@ -233,16 +266,21 @@ public class ShopRestController {
     /**
      * @param shopId    String that contains the id of the webshop.
      * @param productId String that contains the id of the product.
-     * @return Returns HTTP code 200 when product was bought succesfully.
+     * @return Returns HTTP code 200 when product was bought successfully.
      * @throws ExecutionException   when query failed to process.
      * @throws InterruptedException when query failed to process.
      */
     @PutMapping("/buy")
     public ResponseEntity<String> buyProduct(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) throws ExecutionException, InterruptedException {
+        // Execute command (blocks on get)
         String result = (String) commandGateway.send(new BuyProductCommand(shopId, productId)).get();
+
+        // Query current price (might be discounted) and send it to Websocket
+        double currentDiscountedPrice = (Double) queryGateway.query(new GetCurrentDiscountedPriceQuery(shopId, productId), Optional.class).get().get();
+        websocketSender.sendMessage("/price", currentDiscountedPrice);
+
         return new ResponseEntity<>(HttpStatus.OK);
     }
-
 
     // When aggregate cannot be found
     // TODO: MOVE TO CONTROLLERADVICE?

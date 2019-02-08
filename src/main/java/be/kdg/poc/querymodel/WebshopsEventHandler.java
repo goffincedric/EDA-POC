@@ -4,10 +4,7 @@ import be.kdg.poc.configuration.WebshopConfiguration;
 import be.kdg.poc.product.dom.Product;
 import be.kdg.poc.webshop.dom.Webshop;
 import be.kdg.poc.webshop.event.*;
-import be.kdg.poc.webshop.query.GetAllProductsQuery;
-import be.kdg.poc.webshop.query.GetAllWebshops;
-import be.kdg.poc.webshop.query.GetCurrentBalanceQuery;
-import be.kdg.poc.webshop.query.GetCurrentStockAmountQuery;
+import be.kdg.poc.webshop.query.*;
 import lombok.NoArgsConstructor;
 import org.axonframework.eventhandling.AllowReplay;
 import org.axonframework.eventsourcing.EventSourcingHandler;
@@ -15,6 +12,7 @@ import org.axonframework.queryhandling.QueryHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.*;
 
 /**
@@ -83,6 +81,28 @@ public class WebshopsEventHandler {
         System.out.println(this.webshops.get(lowStockEvent.getShopId()).getBalance());
     }
 
+    @EventSourcingHandler
+    protected void on(PriceDiscountRecalculatedEvent priceDiscountRecalculatedEvent) {
+        Webshop webshop = this.webshops.get(priceDiscountRecalculatedEvent.getShopId());
+
+        // Get product
+        Product product = webshop.getProduct(priceDiscountRecalculatedEvent.getProductId()).get();
+        int inventoryAmount = webshop.getInventory().get(product);
+
+        // Set discount based on leftover stock
+        if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT && WebshopConfiguration.RESTOCK_AMOUNT < WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
+            product.setDiscountPercentage(0.25);
+        } else if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT * 2 && WebshopConfiguration.RESTOCK_AMOUNT * 2 < WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
+            product.setDiscountPercentage(0.15);
+        } else if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT * 3 && WebshopConfiguration.RESTOCK_AMOUNT * 3 < WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
+            product.setDiscountPercentage(0.10);
+        } else if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT * 4 && WebshopConfiguration.RESTOCK_AMOUNT * 4 < WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
+            product.setDiscountPercentage(0.05);
+        } else {
+            product.setDiscountPercentage(0);
+        }
+    }
+
     @QueryHandler
     protected Optional handle(GetCurrentBalanceQuery getCurrentBalanceQuery) {
         System.out.println("Balance query");
@@ -98,6 +118,16 @@ public class WebshopsEventHandler {
         System.out.println("Amount query");
         if (webshops.containsKey(getCurrentStockAmountQuery.getShopId())) {
             return webshops.get(getCurrentStockAmountQuery.getShopId()).getInventoryAmount(getCurrentStockAmountQuery.getProductId());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @QueryHandler
+    protected Optional handle(GetCurrentDiscountedPriceQuery getCurrentDiscountedPriceQuery) {
+        System.out.println("Amount query");
+        if (webshops.containsKey(getCurrentDiscountedPriceQuery.getShopId())) {
+            return Optional.of(webshops.get(getCurrentDiscountedPriceQuery.getShopId()).getProduct(getCurrentDiscountedPriceQuery.getProductId()).get().getDiscountedRetailPrice());
         } else {
             return Optional.empty();
         }

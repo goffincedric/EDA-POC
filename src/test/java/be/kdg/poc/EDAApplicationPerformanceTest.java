@@ -57,7 +57,7 @@ public class EDAApplicationPerformanceTest {
 
     @Before
     public void initializeShop() throws Exception {
-        /*// Initialize shop, if it already hasn't been
+        // Initialize shop, if it already hasn't been
         HttpResponse initializeResponse = HttpClientBuilder.create().build().execute(new HttpPost(URL + "/initializeShop"));
         assertTrue(initializeResponse.getStatusLine().getStatusCode() == HttpStatus.OK.value() || initializeResponse.getStatusLine().getStatusCode() == HttpStatus.I_AM_A_TEAPOT.value());
 
@@ -78,12 +78,12 @@ public class EDAApplicationPerformanceTest {
                 getProductsResponse.getEntity().getContent(),
                 new TypeReference<List<Product>>() {
                 });
-        Assert.assertTrue(!products.isEmpty());*/
+        Assert.assertTrue(!products.isEmpty());
     }
 
     @Test
     public void stressTestAPIPerformance() throws InterruptedException {
-        /*// Make ~50 threads and buy random product 1200 times each 50ms
+        // Make ~50 threads and buy random product 1200 times each 50ms
         int threads = 50;
         int callAmount = 1200;
         int callDelayMs = 50;
@@ -101,7 +101,7 @@ public class EDAApplicationPerformanceTest {
                     int index = random.nextInt(products.size());
 
                     // Call API
-                    HttpResponse buyProductResponse = HttpClientBuilder.create().build().execute(new HttpPut(URL + "/buy?shopId=" + webshop.getId() + "&productId=" + products.get(index)));
+                    HttpResponse buyProductResponse = HttpClientBuilder.create().build().execute(new HttpPut(URL + "/buy?shopId=" + webshop.getId() + "&productId=" + products.get(index).getId()));
                     if (buyProductResponse.getStatusLine().getStatusCode() != HttpStatus.OK.value()) {
                         LOGGER.warning("Request #" + j + " returned status code " + buyProductResponse.getStatusLine().getStatusCode());
                     }
@@ -128,6 +128,6 @@ public class EDAApplicationPerformanceTest {
                 //log
                 errors = true;
             }
-        }*/
+        }
     }
 }

@@ -16,5 +16,4 @@ public class AggregateConfig {
     public void configureInMemoryTokenStore(EventProcessingConfigurer configurer) {
         configurer.registerTokenStore(configuration -> new InMemoryTokenStore());
     }
-
 }
