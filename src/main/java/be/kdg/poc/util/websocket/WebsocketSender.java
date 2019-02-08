@@ -2,10 +2,13 @@ package be.kdg.poc.util.websocket;
 
 import org.axonframework.eventhandling.EventBus;
 import org.axonframework.eventhandling.EventMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -15,7 +18,10 @@ import java.util.Date;
  */
 @Component
 public class WebsocketSender {
+    private static final Logger logger = LoggerFactory.getLogger(WebsocketSender.class);
+
     private final SimpMessagingTemplate simpleMessagingTemplate;
+
 
     private final SimpleDateFormat eventMessageDateFormat = new SimpleDateFormat("HH:mm:ss");
 
@@ -26,8 +32,12 @@ public class WebsocketSender {
         // Submit any new events to websocket
         eventBus.subscribe(eventMessages -> eventMessages.stream()
                 .map(this::convertEventToString)
-                .forEach(message -> sendMessage("/app/event", message)));
+                .forEach(message -> {
+                    sendMessage("/event/test", message);
+                }));
+
     }
+
 
     public String convertEventToString(EventMessage message) {
         return eventMessageDateFormat.format(Date.from(message.getTimestamp())) +
@@ -36,6 +46,7 @@ public class WebsocketSender {
     }
 
     public void sendMessage(String destination, Object content) {
+        logger.info(destination, content);
         simpleMessagingTemplate.convertAndSend(destination, content);
     }
 }
