@@ -1,5 +1,6 @@
 package be.kdg.poc.product.dom;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,6 +27,7 @@ public class Product implements Serializable {
     private double discountPercentage;
 
     // Price of product at wholesale
+    @JsonIgnore
     private double buyPrice;
 
     public Product(String name, double retailPrice, double buyPrice) {

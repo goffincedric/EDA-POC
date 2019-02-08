@@ -1,5 +1,6 @@
 package be.kdg.poc.commandmodel;
 
+import be.kdg.poc.configuration.WebshopConfiguration;
 import be.kdg.poc.product.dom.Product;
 import be.kdg.poc.webshop.command.*;
 import be.kdg.poc.webshop.dom.Webshop;
@@ -10,6 +11,7 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 
 import java.util.Optional;
@@ -25,9 +27,6 @@ import java.util.logging.Logger;
 public class WebshopAggregate {
     private final Logger LOGGER = Logger.getLogger(this.getClass().getName());
 
-    // TODO: Initialize value from properties?
-    private static final int LOW_STOCK_TRIGGER = 5;
-
     @AggregateIdentifier
     private String id;
     private Webshop webshop;
@@ -37,10 +36,7 @@ public class WebshopAggregate {
         Assert.hasLength(createShopCommand.getId(), "Missing id");
         Assert.hasLength(createShopCommand.getName(), "Missing shop name");
 
-        // TODO: Change default balance to e.g. 10000.00?
-        // TODO: Move to properties?
-        double defaultBalance = 0;
-        AggregateLifecycle.apply(new WebshopCreatedEvent(createShopCommand.getId(), createShopCommand.getName(), defaultBalance));
+        AggregateLifecycle.apply(new WebshopCreatedEvent(createShopCommand.getId(), createShopCommand.getName(), WebshopConfiguration.INITIAL_BALANCE));
     }
 
     @CommandHandler
@@ -88,7 +84,7 @@ public class WebshopAggregate {
 
         // Check for low stock
         Optional<Integer> optionalAmount = webshop.getInventoryAmount(buyProductCommand.getProductId());
-        if (optionalAmount.isPresent() && optionalAmount.get() - 1 < LOW_STOCK_TRIGGER) {
+        if (optionalAmount.isPresent() && optionalAmount.get() - 1 < WebshopConfiguration.LOW_STOCK_TRIGGER) {
             // Restock product
             AggregateLifecycle.apply(new LowStockEvent(this.id, buyProductCommand.getProductId()));
         }
@@ -127,7 +123,7 @@ public class WebshopAggregate {
 
     @EventSourcingHandler
     protected void on(ProductAddedEvent productAddedEvent) {
-        this.webshop.getInventory().put(productAddedEvent.getProduct(), 0);
+        this.webshop.getInventory().put(productAddedEvent.getProduct(), WebshopConfiguration.INITIAL_PRODUCT_STOCK);
 
         LOGGER.info("Product added to shop with id '" + id + "': " + productAddedEvent.getProduct());
     }
@@ -154,7 +150,14 @@ public class WebshopAggregate {
 
     @EventSourcingHandler
     protected void on(LowStockEvent lowStockEvent) {
-        // TODO: Implement buying new stock, checking if possible with current balance, if balance lower than set limit declare shop bankrupt and initiate delete shop...
+        // Get product
+        Product product = webshop.getProduct(lowStockEvent.getProductId()).get();
+
+        // Lower balance
+        webshop.setBalance(webshop.getBalance() - (product.getBuyPrice() * WebshopConfiguration.RESTOCK_AMOUNT));
+
+        // Restock product
+        webshop.getInventory().compute(product, (key, value) -> ((value == null) ? 0 : value) + WebshopConfiguration.RESTOCK_AMOUNT);
     }
 
     @EventSourcingHandler
