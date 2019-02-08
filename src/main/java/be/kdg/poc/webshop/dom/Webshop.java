@@ -1,6 +1,7 @@
 package be.kdg.poc.webshop.dom;
 
 import be.kdg.poc.product.dom.Product;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -20,6 +21,7 @@ public class Webshop {
     private String id;
     private String name;
 
+    @JsonIgnore
     private Map<Product, Integer> inventory = new HashMap<>();
 
     private double balance;

@@ -107,11 +107,4 @@ public class WebshopAggregateTest {
     public void buyProduct() {
         // TODO
     }
-
-    @Test
-    public void performanceTest() {
-//        String url = "eventshop-poc.herokuapp.com/api/shop/initializeShop";
-//        String
-
-    }
 }

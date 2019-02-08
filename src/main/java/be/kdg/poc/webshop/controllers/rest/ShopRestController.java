@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutionException;
  * 02/02/2019 13:43
  */
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/shop")
 public class ShopRestController {
@@ -90,13 +91,13 @@ public class ShopRestController {
             );
 
             return new ResponseEntity<>(
-                    "Webshop already initialized",
+                    "Webshop initialized",
                     HttpStatus.OK
             );
         } else {
             return new ResponseEntity<>(
                     "Webshop already initialized",
-                    HttpStatus.OK
+                    HttpStatus.I_AM_A_TEAPOT
             );
         }
     }
@@ -138,7 +139,7 @@ public class ShopRestController {
      * @throws ExecutionException   when query failed to process.
      * @throws InterruptedException when query failed to process.
      */
-    @GetMapping("/currentBalance")
+    @GetMapping("/getCurrentBalance")
     public ResponseEntity<Double> getCurrentBalance(@RequestParam(value = "shopId") String shopId) throws ExecutionException, InterruptedException {
         Optional<Double> optionalBalance = (Optional<Double>) queryGateway.query(new GetCurrentBalanceQuery(shopId), Optional.class).get();
         return optionalBalance.map(balance -> new ResponseEntity<>(
@@ -156,7 +157,7 @@ public class ShopRestController {
      * @throws ExecutionException   when query failed to process.
      * @throws InterruptedException when query failed to process.
      */
-    @GetMapping("/stockAmount")
+    @GetMapping("/getStockAmount")
     public ResponseEntity<Integer> getCurrentStockAmount(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) throws ExecutionException, InterruptedException {
         Optional<Integer> optionalAmount = (Optional<Integer>) queryGateway.query(new GetCurrentStockAmountQuery(shopId, productId), Optional.class).get();
         return optionalAmount.map(amount -> new ResponseEntity<>(
