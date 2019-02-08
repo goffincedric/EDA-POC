@@ -79,9 +79,6 @@ public class WebshopAggregate {
         // Buy product event
         AggregateLifecycle.apply(new ProductBoughtEvent(buyProductCommand.getShopId(), buyProductCommand.getProductId()));
 
-        // Recalculate price
-        // TODO: Implement RecalculatePriceCommand
-
         // Check for low stock
         Optional<Integer> optionalAmount = webshop.getInventoryAmount(buyProductCommand.getProductId());
         if (optionalAmount.isPresent() && optionalAmount.get() - 1 < WebshopConfiguration.LOW_STOCK_TRIGGER) {
@@ -89,17 +86,10 @@ public class WebshopAggregate {
             AggregateLifecycle.apply(new LowStockEvent(this.id, buyProductCommand.getProductId()));
         }
 
+        // Recalculate price
+        AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(buyProductCommand.getShopId(), buyProductCommand.getProductId()));
+
         return buyProductCommand.getProductId();
-    }
-
-    @CommandHandler
-    protected void handle(RecalculatePriceDiscountCommand recalculatePriceDiscountCommand) {
-        Assert.isTrue(
-                this.webshop.productExists(recalculatePriceDiscountCommand.getProductId()),
-                "Product not found"
-        );
-
-        AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(recalculatePriceDiscountCommand.getShopId(), recalculatePriceDiscountCommand.getProductId()));
     }
 
     @EventSourcingHandler
@@ -161,8 +151,23 @@ public class WebshopAggregate {
     }
 
     @EventSourcingHandler
-    protected void on(RecalculatePriceDiscountCommand recalculatePriceDiscountCommand) {
-        // TODO: Implement product discount price recalculation based on leftover stock
+    protected void on(PriceDiscountRecalculatedEvent priceDiscountRecalculatedEvent) {
+        // Get product
+        Product product = webshop.getProduct(priceDiscountRecalculatedEvent.getProductId()).get();
+        int inventoryAmount = webshop.getInventory().get(product);
+
+        // Set discount based on leftover stock
+        if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT && WebshopConfiguration.RESTOCK_AMOUNT < WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
+            product.setDiscountPercentage(0.25);
+        } else if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT * 2 && WebshopConfiguration.RESTOCK_AMOUNT * 2 < WebshopConfiguration.INITIAL_PRODUCT_STOCK ) {
+            product.setDiscountPercentage(0.15);
+        } else if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT * 3 && WebshopConfiguration.RESTOCK_AMOUNT * 3 < WebshopConfiguration.INITIAL_PRODUCT_STOCK ) {
+            product.setDiscountPercentage(0.10);
+        } else if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT * 4 && WebshopConfiguration.RESTOCK_AMOUNT * 4 < WebshopConfiguration.INITIAL_PRODUCT_STOCK ) {
+            product.setDiscountPercentage(0.05);
+        } else {
+            product.setDiscountPercentage(0);
+        }
     }
 
     @Override
