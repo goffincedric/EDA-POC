@@ -105,7 +105,6 @@ public class WebshopsEventHandler {
 
     @QueryHandler
     protected Optional handle(GetCurrentBalanceQuery getCurrentBalanceQuery) {
-        System.out.println("Balance query");
         if (webshops.containsKey(getCurrentBalanceQuery.getShopId())) {
             return Optional.of(webshops.get(getCurrentBalanceQuery.getShopId()).getBalance());
         } else {
@@ -115,7 +114,6 @@ public class WebshopsEventHandler {
 
     @QueryHandler
     protected Optional handle(GetCurrentStockAmountQuery getCurrentStockAmountQuery) {
-        System.out.println("Amount query");
         if (webshops.containsKey(getCurrentStockAmountQuery.getShopId())) {
             return webshops.get(getCurrentStockAmountQuery.getShopId()).getInventoryAmount(getCurrentStockAmountQuery.getProductId());
         } else {
@@ -125,7 +123,6 @@ public class WebshopsEventHandler {
 
     @QueryHandler
     protected Optional handle(GetCurrentDiscountedPriceQuery getCurrentDiscountedPriceQuery) {
-        System.out.println("Amount query");
         if (webshops.containsKey(getCurrentDiscountedPriceQuery.getShopId())) {
             return Optional.of(webshops.get(getCurrentDiscountedPriceQuery.getShopId()).getProduct(getCurrentDiscountedPriceQuery.getProductId()).get().getDiscountedRetailPrice());
         } else {
@@ -140,7 +137,6 @@ public class WebshopsEventHandler {
 
     @QueryHandler
     protected List handle(GetAllProductsQuery getAllProductsQuery) {
-        System.out.println("All products query");
         if (webshops.containsKey(getAllProductsQuery.getShopId())) {
             return new ArrayList<>(webshops.get(getAllProductsQuery.getShopId()).getInventory().keySet());
         } else {

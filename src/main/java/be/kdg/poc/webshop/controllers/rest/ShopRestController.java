@@ -182,15 +182,11 @@ public class ShopRestController {
      */
     @GetMapping("/getEvents")
     public ResponseEntity<List<String>> getEvents(@RequestParam(value = "shopId") String shopId) throws ExecutionException, InterruptedException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm:ss");
+
         List<String> events = eventStorageEngine
                 .readEvents(shopId)
                 .asStream()
-                .map(message ->
-                        simpleDateFormat.format(Date.from(message.getTimestamp())) +
-                        " - " +
-                        message.getPayload().toString()
-                )
+                .map(websocketSender::convertEventToString)
                 .collect(Collectors.toList());
 
         return new ResponseEntity<>(
