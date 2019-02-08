@@ -34,7 +34,7 @@ dependencies {
     compile group: 'javax.json', name: 'javax.json-api', version: '1.1.4' // https://mvnrepository.com/artifact/javax.json/javax.json-api
     compile group: 'org.glassfish', name: 'javax.json', version: '1.1.4' // https://mvnrepository.com/artifact/org.glassfish/javax.json
     compile group: 'org.glassfish.jaxb', name: 'jaxb-runtime', version: '2.4.0-b180830.0438' // https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime
-
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.7' // https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
 
     // Web
     compile group: 'org.modelmapper', name: 'modelmapper', version: '2.3.2' // https://mvnrepository.com/artifact/org.modelmapper/modelmapper
