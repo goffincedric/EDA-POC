@@ -31,7 +31,7 @@ public class WebsocketSender {
         // Submit any new events to websocket
         eventBus.subscribe(eventMessages -> eventMessages.stream()
                 .map(this::convertEventToString)
-                .forEach(message -> sendMessage("/event", message)));
+                .forEach(message -> sendMessage("/app/event", message)));
     }
 
     public String convertEventToString(EventMessage message) {
