@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -32,15 +31,14 @@ public class WebsocketSender {
         // Submit any new events to websocket
         eventBus.subscribe(eventMessages -> eventMessages.stream()
                 .map(this::convertEventToString)
-                .forEach(message -> {
-                    sendMessage("/event/test", message);
-                }));
-
+                .forEach(message -> sendMessage("/event/stream", message)));
     }
 
 
     public String convertEventToString(EventMessage message) {
-        return eventMessageDateFormat.format(Date.from(message.getTimestamp())) +
+        return "[" +
+                eventMessageDateFormat.format(Date.from(message.getTimestamp())) +
+                "]" +
                 " - " +
                 message.getPayload().toString();
     }

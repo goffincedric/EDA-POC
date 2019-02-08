@@ -76,9 +76,6 @@ public class WebshopsEventHandler {
 
         // Restock product
         webshop.getInventory().compute(product, (key, value) -> ((value == null) ? 0 : value) + WebshopConfiguration.RESTOCK_AMOUNT);
-
-        System.out.println(webshop.getBalance());
-        System.out.println(this.webshops.get(lowStockEvent.getShopId()).getBalance());
     }
 
     @EventSourcingHandler

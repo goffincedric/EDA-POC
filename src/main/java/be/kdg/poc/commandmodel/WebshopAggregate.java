@@ -41,7 +41,7 @@ public class WebshopAggregate {
 
     @CommandHandler
     protected void handle(DeleteWebshopCommand deleteShopCommand) {
-        AggregateLifecycle.apply(new WebshopDeletedEvent(deleteShopCommand.getShopId()));
+        AggregateLifecycle.apply(new WebshopDeletedEvent(deleteShopCommand.getShopId(), webshop.getName()));
     }
 
     @CommandHandler
@@ -62,7 +62,9 @@ public class WebshopAggregate {
                 "Product not found"
         );
 
-        AggregateLifecycle.apply(new ProductRemovedEvent(removeProductCommand.getShopId(), removeProductCommand.getProductId()));
+        // Get product from webshop
+        Product product = this.webshop.getProduct(removeProductCommand.getProductId()).get();
+        AggregateLifecycle.apply(new ProductRemovedEvent(removeProductCommand.getShopId(), removeProductCommand.getProductId(), product.getName()));
     }
 
     @CommandHandler
@@ -77,17 +79,18 @@ public class WebshopAggregate {
         );
 
         // Buy product event
-        AggregateLifecycle.apply(new ProductBoughtEvent(buyProductCommand.getShopId(), buyProductCommand.getProductId()));
+        Product product = this.webshop.getProduct(buyProductCommand.getProductId()).get();
+        AggregateLifecycle.apply(new ProductBoughtEvent(buyProductCommand.getShopId(), buyProductCommand.getProductId(), product.getName()));
 
         // Check for low stock
         Optional<Integer> optionalAmount = webshop.getInventoryAmount(buyProductCommand.getProductId());
         if (optionalAmount.isPresent() && optionalAmount.get() - 1 < WebshopConfiguration.LOW_STOCK_TRIGGER) {
             // Restock product
-            AggregateLifecycle.apply(new LowStockEvent(this.id, buyProductCommand.getProductId()));
+            AggregateLifecycle.apply(new LowStockEvent(this.id, buyProductCommand.getProductId(), product.getName()));
         }
 
         // Recalculate price
-        AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(buyProductCommand.getShopId(), buyProductCommand.getProductId()));
+        AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(buyProductCommand.getShopId(), buyProductCommand.getProductId(), product.getName()));
 
         return buyProductCommand.getProductId();
     }

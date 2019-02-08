@@ -15,9 +15,10 @@ import lombok.Getter;
 public class ProductRemovedEvent {
     private final String shopId;
     private final String productId;
+    private final String productName;
 
     @Override
     public String toString() {
-        return "Product with id '" + productId + "' removed from shop with id '" + shopId + "'";
+        return "Product '" + productName + "' removed from shop.";
     }
 }

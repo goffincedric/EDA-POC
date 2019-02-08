@@ -68,7 +68,7 @@ public class WebshopAggregateTest {
         fixture.given(new WebshopCreatedEvent(testShopId, testShopName, 0))
                 .when(new DeleteWebshopCommand(testShopId))
                 .expectResultMessageMatching(Matchers.messageWithPayload(Matchers.nothing()))
-                .expectEvents(new WebshopDeletedEvent(testShopId));
+                .expectEvents(new WebshopDeletedEvent(testShopId, testProductName));
     }
 
     @Test
@@ -100,7 +100,7 @@ public class WebshopAggregateTest {
                 )))
                 .when(new RemoveProductCommand(testShopId, testProductId))
                 .expectResultMessageMatching(Matchers.messageWithPayload(Matchers.nothing()))
-                .expectEvents(new ProductRemovedEvent(testShopId, testProductId));
+                .expectEvents(new ProductRemovedEvent(testShopId, testProductId, testShopName));
     }
 
     @Test

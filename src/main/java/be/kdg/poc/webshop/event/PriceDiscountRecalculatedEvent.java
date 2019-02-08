@@ -14,9 +14,10 @@ import lombok.Getter;
 public class PriceDiscountRecalculatedEvent {
     private final String shopId;
     private final String productId;
+    private final String productName;
 
     @Override
     public String toString() {
-        return "Price discount of product with id '" + productId + "' from shop with id '" + shopId + "' has been recalculated";
+        return "Price discount of product '" + productName + "' has been recalculated.";
     }
 }

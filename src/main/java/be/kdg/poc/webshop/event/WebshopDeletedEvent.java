@@ -1,6 +1,5 @@
 package be.kdg.poc.webshop.event;
 
-import be.kdg.poc.product.dom.Product;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -14,9 +13,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public class WebshopDeletedEvent {
     private final String id;
+    private final String name;
 
     @Override
     public String toString() {
-        return "Deleted shop with id '" + id + "'";
+        return "Deleted shop '" + id + "'.";
     }
 }

@@ -7,7 +7,6 @@ import be.kdg.poc.webshop.command.*;
 import be.kdg.poc.webshop.dom.Webshop;
 import be.kdg.poc.webshop.query.*;
 import org.axonframework.commandhandling.gateway.CommandGateway;
-import org.axonframework.eventhandling.DomainEventMessage;
 import org.axonframework.eventsourcing.eventstore.EventStorageEngine;
 import org.axonframework.modelling.command.AggregateNotFoundException;
 import org.axonframework.queryhandling.QueryGateway;
@@ -17,8 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -82,7 +83,7 @@ public class ShopRestController {
                     ),
                     new Product(
                             UUID.randomUUID().toString(),
-                            "Stijn's broken HDD",
+                            "Stijn's broken SSD",
                             100,
                             0,
                             20
