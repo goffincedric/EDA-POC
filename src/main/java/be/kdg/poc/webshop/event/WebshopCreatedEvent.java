@@ -18,6 +18,6 @@ public class WebshopCreatedEvent {
 
     @Override
     public String toString() {
-        return "Created shop '" + name + "' with id '" + id + "'";
+        return "Created shop '" + name + "'.";
     }
 }

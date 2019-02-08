@@ -14,9 +14,10 @@ import lombok.Getter;
 public class LowStockEvent {
     private final String shopId;
     private final String productId;
+    private final String productName;
 
     @Override
     public String toString() {
-        return "Shop with id '" + shopId + "' has low stock of product with id '" + productId + "'";
+        return "Product '" + productName + "' has low stock.";
     }
 }

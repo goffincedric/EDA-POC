@@ -18,6 +18,6 @@ public class ProductAddedEvent {
 
     @Override
     public String toString() {
-        return "Added product '" + product.getName() + "' with to shop with id '" + shopId + "'";
+        return "Added product '" + product.getName() + "'";
     }
 }
