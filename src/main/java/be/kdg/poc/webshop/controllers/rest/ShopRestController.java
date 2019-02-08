@@ -273,7 +273,7 @@ public class ShopRestController {
 
         // Query current price (might be discounted) and send it to Websocket
         double currentDiscountedPrice = (Double) queryGateway.query(new GetCurrentDiscountedPriceQuery(shopId, productId), Optional.class).get().get();
-        websocketSender.sendMessage("/price", currentDiscountedPrice);
+        websocketSender.sendMessage("/app/price", currentDiscountedPrice);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
