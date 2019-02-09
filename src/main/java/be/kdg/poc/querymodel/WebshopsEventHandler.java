@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 import org.axonframework.eventhandling.AllowReplay;
 import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.queryhandling.QueryHandler;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 
 /**
@@ -82,22 +80,9 @@ public class WebshopsEventHandler {
     protected void on(PriceDiscountRecalculatedEvent priceDiscountRecalculatedEvent) {
         Webshop webshop = this.webshops.get(priceDiscountRecalculatedEvent.getShopId());
 
-        // Get product
+        // Get product & set new discount percentage
         Product product = webshop.getProduct(priceDiscountRecalculatedEvent.getProductId()).get();
-        int inventoryAmount = webshop.getInventory().get(product);
-
-        // Set discount based on leftover stock
-        if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT && WebshopConfiguration.RESTOCK_AMOUNT < WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
-            product.setDiscountPercentage(0.25);
-        } else if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT * 2 && WebshopConfiguration.RESTOCK_AMOUNT * 2 < WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
-            product.setDiscountPercentage(0.15);
-        } else if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT * 3 && WebshopConfiguration.RESTOCK_AMOUNT * 3 < WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
-            product.setDiscountPercentage(0.10);
-        } else if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT * 4 && WebshopConfiguration.RESTOCK_AMOUNT * 4 < WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
-            product.setDiscountPercentage(0.05);
-        } else {
-            product.setDiscountPercentage(0);
-        }
+        product.setDiscountPercentage(priceDiscountRecalculatedEvent.getDiscount());
     }
 
     @QueryHandler

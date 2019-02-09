@@ -15,9 +15,10 @@ public class PriceDiscountRecalculatedEvent {
     private final String shopId;
     private final String productId;
     private final String productName;
+    private final double discount;
 
     @Override
     public String toString() {
-        return "Price discount of product '" + productName + "' has been recalculated.";
+        return "Price discount of product '" + productName + "' is now " + (int) (discount * 100) + "%.";
     }
 }
