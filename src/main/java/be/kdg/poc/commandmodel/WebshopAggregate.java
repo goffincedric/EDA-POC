@@ -88,7 +88,7 @@ public class WebshopAggregate {
 
         // Recheck stock
         inventoryAmount = webshop.getInventory().get(product);
-        if (inventoryAmount > WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
+        if (inventoryAmount > WebshopConfiguration.INITIAL_PRODUCT_STOCK && product.getDiscountPercentage()  > 0) {
             int newDiscount = 0;
             AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(this.id, buyProductCommand.getProductId(), product.getName(), newDiscount, product.getRetailPrice() * (1 - newDiscount)));
         } else {
