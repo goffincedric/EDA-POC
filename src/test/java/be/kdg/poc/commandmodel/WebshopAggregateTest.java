@@ -62,7 +62,7 @@ public class WebshopAggregateTest {
         fixture.given()
                 .when(new CreateWebshopCommand(testShopId, testShopName))
                 .expectResultMessageMatching(Matchers.messageWithPayload(Matchers.equalTo(testShopId)))
-                .expectEvents(new WebshopCreatedEvent(testShopId, testShopName, 0));
+                .expectEvents(new WebshopCreatedEvent(testShopId, testShopName, WebshopConfiguration.INITIAL_BALANCE));
     }
 
     @Test
@@ -70,7 +70,7 @@ public class WebshopAggregateTest {
         fixture.given(new WebshopCreatedEvent(testShopId, testShopName, 0))
                 .when(new DeleteWebshopCommand(testShopId))
                 .expectResultMessageMatching(Matchers.messageWithPayload(Matchers.nothing()))
-                .expectEvents(new WebshopDeletedEvent(testShopId, testProductName));
+                .expectEvents(new WebshopDeletedEvent(testShopId, testShopName));
     }
 
     @Test
@@ -102,7 +102,7 @@ public class WebshopAggregateTest {
                 )))
                 .when(new RemoveProductCommand(testShopId, testProductId))
                 .expectResultMessageMatching(Matchers.messageWithPayload(Matchers.nothing()))
-                .expectEvents(new ProductRemovedEvent(testShopId, testProductId, testShopName));
+                .expectEvents(new ProductRemovedEvent(testShopId, testProductId, testProductName));
     }
 
     @Test
