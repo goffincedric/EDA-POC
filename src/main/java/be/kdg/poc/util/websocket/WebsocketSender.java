@@ -35,9 +35,13 @@ public class WebsocketSender {
                 .forEach(message -> sendMessage("/event/stream", message)));
 
         // Submit any PriceDiscountRecalculatedEvent to price socket
-        eventBus.subscribe(eventMessages -> eventMessages.stream()
+        eventBus.subscribe(eventMessages -> eventMessages
+                .stream()
                 .filter(message -> message.getPayload() instanceof PriceDiscountRecalculatedEvent)
-                .forEachOrdered(message -> sendMessage("/price/" + ((PriceDiscountRecalculatedEvent) message.getPayload()).getProductId(), convertEventToString(message)))
+                .forEachOrdered(message -> sendMessage(
+                        "/price/" + ((PriceDiscountRecalculatedEvent) message.getPayload()).getProductId(),
+                        ((PriceDiscountRecalculatedEvent) message.getPayload()).getDiscountedPrice()
+                ))
         );
     }
 
