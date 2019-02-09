@@ -183,7 +183,6 @@ public class ShopRestController {
      */
     @GetMapping("/getEvents")
     public ResponseEntity<List<String>> getEvents(@RequestParam(value = "shopId") String shopId) throws ExecutionException, InterruptedException {
-
         List<String> events = eventStorageEngine
                 .readEvents(shopId)
                 .asStream()
@@ -271,10 +270,6 @@ public class ShopRestController {
     public ResponseEntity<String> buyProduct(@RequestParam(value = "shopId") String shopId, @RequestParam(value = "productId") String productId) throws ExecutionException, InterruptedException {
         // Execute command (blocks on get)
         String result = (String) commandGateway.send(new BuyProductCommand(shopId, productId)).get();
-
-        // Query current price (might be discounted) and send it to Websocket
-        double currentDiscountedPrice = (Double) queryGateway.query(new GetCurrentDiscountedPriceQuery(shopId, productId), Optional.class).get().get();
-        websocketSender.sendMessage("/app/price", currentDiscountedPrice);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

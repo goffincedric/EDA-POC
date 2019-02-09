@@ -46,6 +46,6 @@ public class Webshop {
 
     @Override
     public String toString() {
-        return "Id: '" + id + "', Name: '" + name + "', Balance: " + balance;
+        return "Webshop '" + this.getName() + "' (id: '" + id + "') has balance of €" + String.format("%.2f", this.getBalance());
     }
 }

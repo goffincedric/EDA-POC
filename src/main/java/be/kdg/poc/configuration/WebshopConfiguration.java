@@ -13,6 +13,7 @@ public class WebshopConfiguration {
     public static int INITIAL_PRODUCT_STOCK;
     public static int RESTOCK_AMOUNT;
     public static double INITIAL_BALANCE;
+    public static double BASE_DISCOUNT;
 
     @Value("${webshop.product.stock.low_stock_trigger}")
     public void setLowStockTrigger(int lowStockTrigger) {
@@ -32,5 +33,10 @@ public class WebshopConfiguration {
     @Value("${webshop.initial.balance}")
     public void setInitialBalance(double initialBalance) {
         INITIAL_BALANCE = initialBalance;
+    }
+
+    @Value("${webshop.base_discount}")
+    public void setBaseDiscount(double baseDiscount) {
+        BASE_DISCOUNT = baseDiscount;
     }
 }

@@ -11,10 +11,8 @@ import org.axonframework.eventsourcing.EventSourcingHandler;
 import org.axonframework.modelling.command.AggregateIdentifier;
 import org.axonframework.modelling.command.AggregateLifecycle;
 import org.axonframework.spring.stereotype.Aggregate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
 
-import java.util.Optional;
 import java.util.logging.Logger;
 
 /**
@@ -83,14 +81,25 @@ public class WebshopAggregate {
         AggregateLifecycle.apply(new ProductBoughtEvent(buyProductCommand.getShopId(), buyProductCommand.getProductId(), product.getName()));
 
         // Check for low stock
-        Optional<Integer> optionalAmount = webshop.getInventoryAmount(buyProductCommand.getProductId());
-        if (optionalAmount.isPresent() && optionalAmount.get() - 1 < WebshopConfiguration.LOW_STOCK_TRIGGER) {
-            // Restock product
+        int inventoryAmount = webshop.getInventory().get(product);
+        if (inventoryAmount < WebshopConfiguration.LOW_STOCK_TRIGGER) {
             AggregateLifecycle.apply(new LowStockEvent(this.id, buyProductCommand.getProductId(), product.getName()));
         }
 
-        // Recalculate price
-        AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(buyProductCommand.getShopId(), buyProductCommand.getProductId(), product.getName()));
+        // Recheck stock
+        inventoryAmount = webshop.getInventory().get(product);
+        if (inventoryAmount > WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
+            AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(this.id, buyProductCommand.getProductId(), product.getName(), 0));
+        } else {
+            for (int i = 0; i < 5; i++) {
+                int discountStock = WebshopConfiguration.INITIAL_PRODUCT_STOCK - (5 * i);
+                if (discountStock < 0) {
+                    break;
+                } else if (inventoryAmount == discountStock) {
+                    AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(this.id, buyProductCommand.getProductId(), product.getName(), WebshopConfiguration.BASE_DISCOUNT * i));
+                }
+            }
+        }
 
         return buyProductCommand.getProductId();
     }
@@ -104,21 +113,21 @@ public class WebshopAggregate {
                 shopCreatedEvent.getBalance()
         );
 
-        LOGGER.info("Shop created: " + webshop);
+        LOGGER.info(shopCreatedEvent.toString());
     }
 
     @EventSourcingHandler
     protected void on(WebshopDeletedEvent shopDeletedEvent) {
         AggregateLifecycle.markDeleted();
 
-        LOGGER.info("Shop deleted: " + webshop);
+        LOGGER.info(shopDeletedEvent.toString());
     }
 
     @EventSourcingHandler
     protected void on(ProductAddedEvent productAddedEvent) {
         this.webshop.getInventory().put(productAddedEvent.getProduct(), WebshopConfiguration.INITIAL_PRODUCT_STOCK);
 
-        LOGGER.info("Product added to shop with id '" + id + "': " + productAddedEvent.getProduct());
+        LOGGER.info(productAddedEvent.toString());
     }
 
     @EventSourcingHandler
@@ -126,7 +135,7 @@ public class WebshopAggregate {
         Product product = this.webshop.getProduct(productRemovedEvent.getProductId()).get();
         this.webshop.getInventory().remove(product);
 
-        LOGGER.info("Product (" + product + ") added to shop with id '" + id + "'");
+        LOGGER.info(productRemovedEvent.toString());
     }
 
     @EventSourcingHandler
@@ -138,7 +147,7 @@ public class WebshopAggregate {
         // Add retailprice to current balance
         this.webshop.setBalance(this.webshop.getBalance() + product.getRetailPrice());
 
-        LOGGER.info("Product (" + product + ") bought from shop with id '" + id + "'");
+        LOGGER.info(productBoughtEvent.toString());
     }
 
     @EventSourcingHandler
@@ -151,30 +160,21 @@ public class WebshopAggregate {
 
         // Restock product
         webshop.getInventory().compute(product, (key, value) -> ((value == null) ? 0 : value) + WebshopConfiguration.RESTOCK_AMOUNT);
+
+        LOGGER.info(lowStockEvent.toString());
     }
 
     @EventSourcingHandler
     protected void on(PriceDiscountRecalculatedEvent priceDiscountRecalculatedEvent) {
-        // Get product
+        // Get product & set new discount percentage
         Product product = webshop.getProduct(priceDiscountRecalculatedEvent.getProductId()).get();
-        int inventoryAmount = webshop.getInventory().get(product);
+        product.setDiscountPercentage(priceDiscountRecalculatedEvent.getDiscount());
 
-        // Set discount based on leftover stock
-        if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT && WebshopConfiguration.RESTOCK_AMOUNT < WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
-            product.setDiscountPercentage(0.25);
-        } else if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT * 2 && WebshopConfiguration.RESTOCK_AMOUNT * 2 < WebshopConfiguration.INITIAL_PRODUCT_STOCK ) {
-            product.setDiscountPercentage(0.15);
-        } else if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT * 3 && WebshopConfiguration.RESTOCK_AMOUNT * 3 < WebshopConfiguration.INITIAL_PRODUCT_STOCK ) {
-            product.setDiscountPercentage(0.10);
-        } else if (inventoryAmount < WebshopConfiguration.RESTOCK_AMOUNT * 4 && WebshopConfiguration.RESTOCK_AMOUNT * 4 < WebshopConfiguration.INITIAL_PRODUCT_STOCK ) {
-            product.setDiscountPercentage(0.05);
-        } else {
-            product.setDiscountPercentage(0);
-        }
+        LOGGER.info(priceDiscountRecalculatedEvent.toString());
     }
 
     @Override
     public String toString() {
-        return "Webshop '" + this.webshop.getName() + "' (id: '" + id + "') has balance of €" + String.format("%.2f", this.webshop.getBalance());
+        return this.webshop.toString();
     }
 }

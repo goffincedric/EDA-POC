@@ -1,5 +1,6 @@
 package be.kdg.poc.util.websocket;
 
+import be.kdg.poc.webshop.event.PriceDiscountRecalculatedEvent;
 import org.axonframework.eventhandling.EventBus;
 import org.axonframework.eventhandling.EventMessage;
 import org.slf4j.Logger;
@@ -32,6 +33,12 @@ public class WebsocketSender {
         eventBus.subscribe(eventMessages -> eventMessages.stream()
                 .map(this::convertEventToString)
                 .forEach(message -> sendMessage("/event/stream", message)));
+
+        // Submit any PriceDiscountRecalculatedEvent to price socket
+        eventBus.subscribe(eventMessages -> eventMessages.stream()
+                .filter(message -> message.getPayload() instanceof PriceDiscountRecalculatedEvent)
+                .forEachOrdered(message -> sendMessage("/price/" + ((PriceDiscountRecalculatedEvent) message.getPayload()).getProductId(), convertEventToString(message)))
+        );
     }
 
 

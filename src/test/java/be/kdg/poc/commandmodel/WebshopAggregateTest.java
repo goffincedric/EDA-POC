@@ -1,5 +1,6 @@
 package be.kdg.poc.commandmodel;
 
+import be.kdg.poc.configuration.WebshopConfiguration;
 import be.kdg.poc.product.dom.Product;
 import be.kdg.poc.webshop.command.AddProductCommand;
 import be.kdg.poc.webshop.command.CreateWebshopCommand;
@@ -21,6 +22,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.transaction.Transactional;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -105,6 +107,31 @@ public class WebshopAggregateTest {
 
     @Test
     public void buyProduct() {
+//        for (int j = 0; j < 100; j++) {
+//            System.out.println("###########");
+//            System.out.println("RUN ");
+//            System.out.println("###########");
+//
+//            int initial = 25;
+//            int inventory = new Random().nextInt(35);
+//            System.out.println(inventory);
+//
+//            if (inventory == 0 || inventory > WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
+//                System.out.println("discount = " + 0);
+//            } else {
+//                for (int i = 0; i < 5; i++) {
+//                    int discountStock = initial - (5 * i);
+//                    if (discountStock < 0) {
+//                        break;
+//                    } else {
+//                        if (inventory == discountStock) {
+//                            System.out.println("discountStock = " + discountStock);
+//                            System.out.println(WebshopConfiguration.BASE_DISCOUNT * i);
+//                        }
+//                    }
+//                }
+//            }
+//        }
         // TODO
     }
 }
