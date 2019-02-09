@@ -89,14 +89,16 @@ public class WebshopAggregate {
         // Recheck stock
         inventoryAmount = webshop.getInventory().get(product);
         if (inventoryAmount > WebshopConfiguration.INITIAL_PRODUCT_STOCK) {
-            AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(this.id, buyProductCommand.getProductId(), product.getName(), 0));
+            int newDiscount = 0;
+            AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(this.id, buyProductCommand.getProductId(), product.getName(), newDiscount, product.getRetailPrice() * (1 - newDiscount)));
         } else {
             for (int i = 0; i < 5; i++) {
-                int discountStock = WebshopConfiguration.INITIAL_PRODUCT_STOCK - (5 * i);
+                double discountStock = WebshopConfiguration.INITIAL_PRODUCT_STOCK - (5 * i);
                 if (discountStock < 0) {
                     break;
                 } else if (inventoryAmount == discountStock) {
-                    AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(this.id, buyProductCommand.getProductId(), product.getName(), WebshopConfiguration.BASE_DISCOUNT * i));
+                    double newDiscount = WebshopConfiguration.BASE_DISCOUNT * i;
+                    AggregateLifecycle.apply(new PriceDiscountRecalculatedEvent(this.id, buyProductCommand.getProductId(), product.getName(), newDiscount, product.getRetailPrice() * (1 - newDiscount)));
                 }
             }
         }

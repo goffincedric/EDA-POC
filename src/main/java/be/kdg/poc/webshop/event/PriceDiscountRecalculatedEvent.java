@@ -16,6 +16,7 @@ public class PriceDiscountRecalculatedEvent {
     private final String productId;
     private final String productName;
     private final double discount;
+    private final double discountedPrice;
 
     @Override
     public String toString() {
